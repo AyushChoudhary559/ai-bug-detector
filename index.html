@@ -63,11 +63,15 @@
                 <button onclick="app.closeAuthModal()" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-8">
-                <h2 class="text-2xl font-bold text-white mb-6 text-center">Welcome back</h2>
-                <form onsubmit="event.preventDefault(); app.mockSignIn();" class="space-y-4">
-                    <div><label class="block text-sm text-slate-400 mb-1">Email</label><input type="email" id="auth-email" value="demo@devsentry.ai" class="w-full bg-navy-950 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-brand-500 transition" required></div>
-                    <div><label class="block text-sm text-slate-400 mb-1">Password</label><input type="password" value="password123" class="w-full bg-navy-950 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-brand-500 transition" required></div>
-                    <button type="submit" id="btn-signin" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-lg px-4 py-2 transition flex justify-center items-center gap-2">Sign In</button>
+                <div class="mb-6">
+                    <h2 id="auth-title" class="text-xl font-semibold text-white mb-1">Sign In</h2>
+                    <p id="auth-subtitle" class="text-sm text-slate-400">Welcome back! Please enter your details.</p>
+                </div>
+                <form onsubmit="event.preventDefault();" class="space-y-4">
+                    <div><label class="block text-sm text-slate-400 mb-1">Username (or Email for Login)</label><input type="text" id="auth-email" placeholder="john_doe" class="w-full bg-navy-950 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-brand-500 transition" required></div>
+                    <div><label class="block text-sm text-slate-400 mb-1">Password</label><input type="password" id="auth-password" class="w-full bg-navy-950 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-brand-500 transition" required></div>
+                    <button type="button" onclick="app.submitAuth(document.getElementById('auth-title').innerText === 'Create Account')" id="btn-signin" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-lg px-4 py-2 transition flex justify-center items-center gap-2">Sign In</button>
+                    <p id="auth-toggle" onclick="app.toggleAuthMode()" class="text-center text-sm text-slate-400 mt-4 cursor-pointer">Don't have an account? <span class="text-brand-500 font-medium hover:underline">Sign up</span></p>
                 </form>
             </div>
         </div>
@@ -674,22 +678,72 @@
             },
             openAuthModal() { const m = document.getElementById('auth-modal'); if(m) { m.classList.remove('hidden'); setTimeout(() => m.classList.remove('opacity-0'), 10); } },
             closeAuthModal() { const m = document.getElementById('auth-modal'); if(m) { m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); } },
-            mockSignIn() {
+            async submitAuth(isRegister) {
                 const btn = document.getElementById('btn-signin');
-                const email = document.getElementById('auth-email').value || 'demo@devsentry.ai';
-                const name = email.split('@')[0].toUpperCase();
+                const username = document.getElementById('auth-username') ? document.getElementById('auth-username').value : document.getElementById('auth-email').value.split('@')[0];
+                const email = document.getElementById('auth-email').value;
+                const password = document.getElementById('auth-password').value;
                 
                 if(btn) btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>`;
                 lucide.createIcons();
                 
-                setTimeout(() => {
-                    const userData = { email, name };
+                const url = isRegister ? 'http://localhost:8080/api/auth/register' : 'http://localhost:8080/api/auth/login';
+                const body = isRegister ? {username, email, password} : {username, password};
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    
+                    if (!response.ok) {
+                        const errText = await response.text();
+                        throw new Error(errText || "Authentication failed");
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Save JWT and user data
+                    const userData = { email: data.email, name: data.username, token: data.token };
                     localStorage.setItem('devsentry_user', JSON.stringify(userData));
-                    this.loadAuth();
+                    this.user = userData;
+                    
                     this.closeAuthModal();
-                    if(btn) btn.innerHTML = `Sign In`;
-                    this.showAlert("Success", `Welcome back, ${name}!`);
-                }, 1000);
+                    this.updateAuthUI();
+                    
+                } catch (err) {
+                    alert("Auth Error: " + err.message);
+                    if(btn) btn.innerHTML = isRegister ? `Create Account` : `Sign In`;
+                }
+            },
+            toggleAuthMode() {
+                const title = document.getElementById('auth-title');
+                const subtitle = document.getElementById('auth-subtitle');
+                const btn = document.getElementById('btn-signin');
+                const toggle = document.getElementById('auth-toggle');
+                
+                if (title.innerText === "Sign In") {
+                    title.innerText = "Create Account";
+                    subtitle.innerText = "Join DevSentry AI to start auditing code.";
+                    btn.innerText = "Register";
+                    toggle.innerHTML = `Already have an account? <span class="text-brand-500 font-medium hover:underline cursor-pointer">Sign in</span>`;
+                    btn.setAttribute("onclick", "app.submitAuth(true)");
+                } else {
+                    title.innerText = "Sign In";
+                    subtitle.innerText = "Welcome back! Please enter your details.";
+                    btn.innerText = "Sign In";
+                    toggle.innerHTML = `Don't have an account? <span class="text-brand-500 font-medium hover:underline cursor-pointer">Sign up</span>`;
+                    btn.setAttribute("onclick", "app.submitAuth(false)");
+                }
+            },
+            updateAuthUI() {
+                const data = JSON.parse(localStorage.getItem('devsentry_user'));
+                document.getElementById('auth-logged-out').classList.add('hidden');
+                document.getElementById('auth-logged-in').classList.remove('hidden');
+                document.getElementById('user-name').textContent = data.name;
+                document.getElementById('dropdown-user-name').textContent = data.name;
+                document.getElementById('dropdown-user-email').textContent = data.email;
             },
             mockSignOut() {
                 localStorage.removeItem('devsentry_user');
@@ -859,8 +913,12 @@
                         data = this.generateMockData(lang, code);
                     } else {
                         try {
+                            const headers = { 'Content-Type': 'application/json' };
+                            if (this.user && this.user.token) {
+                                headers['Authorization'] = 'Bearer ' + this.user.token;
+                            }
                             const response = await fetch('http://localhost:8080/api/v1/detector/analyze', {
-                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                method: 'POST', headers: headers,
                                 body: JSON.stringify({ language: lang, sourceCode: code })
                             });
                             if (!response.ok) throw new Error("HTTP " + response.status);

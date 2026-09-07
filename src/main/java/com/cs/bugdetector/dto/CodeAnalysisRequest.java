@@ -1,6 +1,9 @@
 package com.cs.bugdetector.dto;
 
-public record CodeAnalysisRequest(
-    String language,
-    String sourceCode
-) {}
+import lombok.Data;
+
+@Data
+public class CodeAnalysisRequest {
+    private String language;
+    private String sourceCode;
+}

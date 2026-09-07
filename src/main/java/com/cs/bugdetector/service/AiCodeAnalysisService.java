@@ -37,7 +37,7 @@ public class AiCodeAnalysisService {
             
             Source Code to Analyze:
             %s
-            """.formatted(request.language(), request.sourceCode());
+            """.formatted(request.getLanguage(), request.getSourceCode());
 
         // 4. Execute Call and map directly to DTO without errors
         return chatClient.prompt()

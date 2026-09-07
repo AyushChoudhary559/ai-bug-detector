@@ -1,144 +1,67 @@
-# DevSentry AI 🛡️
-> **AI-Powered Code Bug, Security Vulnerability & SAST Analysis Engine**
+# DevSentry AI
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Java](https://img.shields.io/badge/Java-17%2B-orange.svg)](https://www.oracle.com/java/)
-[![Spring AI](https://img.shields.io/badge/Spring%20AI-Framework-green.svg)](https://spring.io/projects/spring-ai)
-[![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC.svg)](https://tailwindcss.com/)
+An elite Static Application Security Testing (SAST) engine and AI Code Bug Detector.
 
-DevSentry AI is a developer-centric Static Application Security Testing (SAST) and code intelligence platform. It analyzes source code in real-time to detect syntax errors, logical bugs, security vulnerabilities (like SQL Injections, XSS, and SSRF), resource leaks, and performance bottlenecks, providing actionable fix recommendations and clean, corrected code.
+## Project Overview
+DevSentry AI helps developers find and fix Syntax Errors, Logical Flaws, Security Vulnerabilities, Resource Leaks, and Performance Bottlenecks automatically using an intelligent AI engine.
 
----
+## Technology Stack
+- **Frontend**: Single Page HTML Application, Vanilla JavaScript, Tailwind CSS (via CDN), Monaco Editor.
+- **Backend**: Java 17, Spring Boot 3.3.4, Spring Security (JWT), Spring Data JPA.
+- **Database**: H2 (In-memory development default) / MySQL (Production).
+- **AI Integration**: Spring AI (OpenAI API).
 
-## ✨ Features
-
-- 🔍 **Multi-Vector Bug Analysis**: Detects issues categorized across **SYNTAX**, **LOGIC**, **SECURITY**, **RESOURCE_LEAK**, and **PERFORMANCE**.
-- 🚦 **Severity Grading**: Issues are flagged with severity levels: **CRITICAL**, **HIGH**, **MEDIUM**, and **LOW**.
-- 📊 **Health & Quality Score**: Instant calculation of codebase quality on a 0–100 scale.
-- 💡 **AI Fix Recommendations**: Provides clear, actionable solutions alongside an auto-corrected version of the analyzed code.
-- 💻 **Interactive Monaco Code Editor**: Powered by the Monaco Editor engine (the core of VS Code) with full syntax highlighting for Java, Python, C++, and JavaScript.
-- 🎨 **Modern Dark UI**: Designed with glassmorphism, responsive grid layout, and Lucide icons for maximum developer productivity.
-
----
-
-## 🛠️ Technologies Used
-
-### Frontend
-- **HTML5 & Vanilla JavaScript**: Lightweight, responsive client logic.
-- **Tailwind CSS (CDN)**: Modern utility-first CSS styling and dark theme.
-- **Monaco Editor**: High-performance browser-based code editing.
-- **Lucide Icons**: Crisp, modern icon set.
-
-### Backend
-- **Java 17+**: Robust, strongly-typed backend architecture.
-- **Spring Boot & Spring AI**: Enterprise AI orchestration using `ChatClient` and `BeanOutputConverter` for schema-enforced structured JSON output.
-
----
-
-## 📂 Project Structure
-
+## Folder Structure
 ```text
-ai-bug-detector/
-├── .gitignore                                          # Git ignore configuration
-├── README.md                                           # Comprehensive project documentation
-├── index.html                                          # Interactive DevSentry AI frontend dashboard
-└── src/
-    └── main/
-        └── java/
-            └── com/
-                └── cs/
-                    └── bugdetector/
-                        ├── dto/
-                        │   ├── CodeAnalysisRequest.java  # Request DTO (language, sourceCode)
-                        │   └── BugReportResponse.java    # Structured Response Record DTO
-                        └── service/
-                            └── AiCodeAnalysisService.java # Spring AI SAST prompt engine & logic
+/
+├── index.html                           (Main Frontend UI & Logic)
+├── pom.xml                              (Maven Dependencies)
+├── src/main/java/com/cs/bugdetector/
+│   ├── controller/                      (REST Controllers)
+│   ├── dto/                             (Data Transfer Objects)
+│   ├── entity/                          (JPA Database Entities)
+│   ├── repository/                      (Spring Data Repositories)
+│   ├── security/                        (JWT & Spring Security Config)
+│   ├── service/                         (AI & Mock Services)
+│   └── DevSentryApplication.java        (Spring Boot Main Class)
+└── src/main/resources/
+    └── application.properties           (Config Variables)
 ```
 
----
+## Prerequisites
+- **Java**: JDK 17 (Required for Spring Boot 3)
+- **Database**: None needed out-of-the-box (uses H2). To switch to MySQL, edit `application.properties`.
 
-## 📋 Requirements & Prerequisites
+## How to Start the Application
 
-To run and extend the complete backend service, ensure you have:
-- **Java Development Kit (JDK)**: Version 17 or higher.
-- **Maven** or **Gradle**: For building the Spring Boot project.
-- **Modern Web Browser**: Chrome, Edge, Firefox, or Safari.
-- **AI Model Access**: OpenAI, Gemini, or Ollama API key configured with Spring AI.
+### 1. Start the Backend
+1. Open a terminal in the root directory.
+2. Run `./mvnw spring-boot:run` (or use your IDE).
+3. The server will start on `http://localhost:8080`.
 
----
+*(Note: If `AI_API_KEY` is not provided, the backend will safely fallback to a Mock AI Provider so you can still demonstrate functionality.)*
 
-## 🚀 Getting Started & How to Run
+### 2. Start the Frontend
+1. Open `index.html` in your browser (e.g., via VS Code Live Server).
+2. The UI will automatically communicate with the backend.
 
-### 1. Running the Frontend Dashboard
-Simply open `index.html` in your web browser:
-```bash
-# Windows
-start index.html
+## API Documentation
 
-# macOS
-open index.html
+**AUTH ENDPOINTS**
+- `POST /api/auth/register` (Requires JSON: `username`, `email`, `password`)
+- `POST /api/auth/login` (Requires JSON: `username`, `password`)
+- `GET /api/auth/me` (Requires Header: `Authorization: Bearer <token>`)
 
-# Linux
-xdg-open index.html
+**AUDIT ENDPOINTS**
+- `POST /api/v1/detector/analyze` (Requires Header: `Authorization: Bearer <token>`, JSON: `language`, `sourceCode`)
+- `GET /api/audits` (Requires Header: `Authorization: Bearer <token>`)
+- `GET /api/audits/stats` (Requires Header: `Authorization: Bearer <token>`)
+
+## Environment Variables (.env.example)
+```properties
+DATABASE_URL=jdbc:mysql://localhost:3306/devsentry
+DATABASE_USERNAME=root
+DATABASE_PASSWORD=secret
+JWT_SECRET=8f7b243b8d4e9c71a35f6e8b4d2a1c9f0b7e5d3c1a9f6e4b2d8c0a5f3e7b1d9
+AI_API_KEY=sk-your-openai-key
 ```
-
-### 2. Integrating with Spring AI Backend
-1. Include the Java classes in your Spring Boot application under `com.cs.bugdetector`.
-2. Configure your AI model provider in `application.yml` (e.g. OpenAI, Azure OpenAI, or Ollama):
-   ```yaml
-   spring:
-     ai:
-       openai:
-         api-key: ${OPENAI_API_KEY}
-         chat:
-           options:
-             model: gpt-4o
-   ```
-3. Expose a REST Controller that delegates to `AiCodeAnalysisService`:
-   ```java
-   @PostMapping("/api/analyze")
-   public ResponseEntity<BugReportResponse> analyze(@RequestBody CodeAnalysisRequest request) {
-       return ResponseEntity.ok(aiCodeAnalysisService.analyzeCode(request));
-   }
-   ```
-
----
-
-## 🖥️ Usage Workflow
-
-1. Select your target programming language (Java, C++, Python, or JavaScript) from the top navigation bar.
-2. Paste or type your code into the left editor pane.
-3. Click **"Run AI Audit"**.
-4. Review the generated **Quality Score**, detected issues list, severity badges, and the **Corrected Code** tab.
-
----
-
-## 📸 Screenshots
-
-| Feature | Preview |
-| :--- | :--- |
-| **Main Dashboard & Code Editor** | *Monaco editor with multi-language code input and custom theme* |
-| **Audit Results & Quality Score** | *Detailed issue cards with severity, lines, and fix recommendations* |
-| **Corrected Code Output** | *Full auto-remediated version of submitted source code* |
-
----
-
-## 🔮 Future Improvements
-
-- [ ] Add support for multi-file repository scanning and ZIP uploads.
-- [ ] Implement automated CI/CD GitHub Action integrations.
-- [ ] Add PDF and Markdown export for security compliance reports.
-- [ ] Support local offline LLMs via Ollama.
-
----
-
-## 👤 Author
-
-**Ayush Choudhary**
-- GitHub: [@AyushChoudhary559](https://github.com/AyushChoudhary559)
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
