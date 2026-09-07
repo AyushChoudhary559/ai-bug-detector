@@ -31,7 +31,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
     <!-- Custom Styles -->
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #e2e8f0; }
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #e2e8f0; overflow-x: hidden; }
         .code-font { font-family: 'Fira Code', monospace; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -53,7 +53,7 @@
         .monaco-highlight-line { background-color: rgba(225, 29, 72, 0.2); border-left: 4px solid #e11d48; }
     </style>
 </head>
-<body class="bg-navy-900 text-slate-300 font-sans min-h-screen overflow-x-hidden relative">
+<body class="bg-navy-900 text-slate-300 font-sans min-h-screen relative flex flex-col">
 
     <!-- Auth Modal -->
     <div id="auth-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
@@ -65,8 +65,8 @@
             <div class="p-8">
                 <h2 class="text-2xl font-bold text-white mb-6 text-center">Welcome back</h2>
                 <form onsubmit="event.preventDefault(); app.mockSignIn();" class="space-y-4">
-                    <div><label class="block text-sm text-slate-400 mb-1">Email</label><input type="email" value="demo@devsentry.ai" class="w-full bg-navy-950 border border-slate-700 rounded-lg px-4 py-2 text-white" required></div>
-                    <div><label class="block text-sm text-slate-400 mb-1">Password</label><input type="password" value="password123" class="w-full bg-navy-950 border border-slate-700 rounded-lg px-4 py-2 text-white" required></div>
+                    <div><label class="block text-sm text-slate-400 mb-1">Email</label><input type="email" id="auth-email" value="demo@devsentry.ai" class="w-full bg-navy-950 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-brand-500 transition" required></div>
+                    <div><label class="block text-sm text-slate-400 mb-1">Password</label><input type="password" value="password123" class="w-full bg-navy-950 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-brand-500 transition" required></div>
                     <button type="submit" id="btn-signin" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-lg px-4 py-2 transition flex justify-center items-center gap-2">Sign In</button>
                 </form>
             </div>
@@ -76,14 +76,14 @@
     <!-- Alert Modal (For Empty Code etc) -->
     <div id="alert-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-navy-900 border border-slate-800 rounded-2xl w-full max-w-sm p-6 text-center shadow-2xl">
-            <i data-lucide="alert-circle" class="w-12 h-12 text-rose-500 mx-auto mb-4"></i>
-            <h3 class="text-lg font-bold text-white mb-2" id="alert-title">No code detected</h3>
-            <p class="text-sm text-slate-400 mb-6" id="alert-message">Please paste your Java, C++, or Python code before starting the audit.</p>
+            <i data-lucide="info" class="w-12 h-12 text-brand-400 mx-auto mb-4" id="alert-icon"></i>
+            <h3 class="text-lg font-bold text-white mb-2" id="alert-title">Notification</h3>
+            <p class="text-sm text-slate-400 mb-6" id="alert-message">Message details.</p>
             <button onclick="app.closeAlert()" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">Got it</button>
         </div>
     </div>
 
-    <div class="flex min-h-screen">
+    <div class="flex flex-1 min-h-screen">
         
         <!-- Sidebar Navigation -->
         <aside id="sidebar" class="w-64 fixed inset-y-0 left-0 z-50 bg-navy-950 border-r border-slate-800/60 flex flex-col transition-transform duration-300 transform -translate-x-full md:translate-x-0">
@@ -92,7 +92,7 @@
                     <div class="bg-brand-500/10 p-2 rounded-lg text-brand-400"><i data-lucide="shield-check" class="w-6 h-6"></i></div>
                     <h1 class="text-lg font-bold text-white tracking-tight">DevSentry <span class="text-brand-400">AI</span></h1>
                 </div>
-                <button class="md:hidden text-slate-400" onclick="app.toggleSidebar()"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button class="md:hidden text-slate-400 hover:text-white" onclick="app.toggleSidebar()"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             
             <div class="flex-1 overflow-y-auto py-6 flex flex-col gap-2">
@@ -121,7 +121,7 @@
         </aside>
 
         <!-- Mobile Sidebar Overlay -->
-        <div id="sidebar-overlay" onclick="app.toggleSidebar()" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+        <div id="sidebar-overlay" onclick="app.toggleSidebar(false)" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
 
         <!-- Main Content Area -->
         <main class="flex-1 flex flex-col md:ml-64 w-full min-w-0 min-h-screen">
@@ -129,7 +129,7 @@
             <!-- Top Header -->
             <header class="sticky top-0 z-30 bg-navy-950/80 backdrop-blur-md h-16 border-b border-slate-800/60 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm">
                 <div class="flex items-center gap-3 text-sm font-medium text-slate-400">
-                    <button class="md:hidden text-slate-400 hover:text-white" onclick="app.toggleSidebar()"><i data-lucide="menu" class="w-6 h-6"></i></button>
+                    <button class="md:hidden text-slate-400 hover:text-white p-1" onclick="app.toggleSidebar(true)"><i data-lucide="menu" class="w-6 h-6"></i></button>
                     <div class="hidden sm:flex items-center">
                         <span class="hover:text-white cursor-pointer" onclick="app.navigate('dashboard')">DevSentry AI</span>
                         <i data-lucide="chevron-right" class="w-4 h-4 mx-2 opacity-50"></i>
@@ -149,36 +149,36 @@
                         <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                     </div>
                     
-                    <button onclick="app.toggleTheme()" class="text-slate-400 hover:text-brand-400 transition-colors p-1"><i data-lucide="moon" class="w-5 h-5"></i></button>
+                    <button onclick="app.toggleTheme()" class="text-slate-400 hover:text-brand-400 transition-colors p-1" title="Toggle Theme"><i data-lucide="moon" class="w-5 h-5"></i></button>
                     <div class="w-px h-6 bg-slate-800 hidden sm:block"></div>
 
                     <!-- User Profile Area -->
                     <div class="relative">
                         <div id="auth-logged-out">
-                            <button onclick="app.openAuthModal()" class="flex items-center gap-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+                            <button onclick="app.openAuthModal()" class="flex items-center gap-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition shadow-sm">
                                 <i data-lucide="user" class="w-4 h-4"></i> <span class="hidden sm:inline">Sign In</span>
                             </button>
                         </div>
                         
                         <div id="auth-logged-in" class="hidden">
                             <button onclick="app.toggleUserDropdown(event)" class="flex items-center gap-2 text-sm font-medium hover:text-white transition focus:outline-none">
-                                <img src="https://ui-avatars.com/api/?name=Ayush+Developer&background=6366f1&color=fff" alt="User" class="w-8 h-8 rounded-full border border-slate-700">
-                                <span class="hidden sm:inline text-slate-200">Ayush Developer</span>
+                                <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" alt="User" class="w-8 h-8 rounded-full border border-slate-700">
+                                <span class="hidden sm:inline text-slate-200" id="user-name">User</span>
                                 <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
                             </button>
                             
                             <!-- Dropdown -->
                             <div id="user-dropdown" class="absolute right-0 mt-2 w-56 bg-navy-950 border border-slate-800 rounded-xl shadow-xl hidden opacity-0 transition-opacity z-50 overflow-hidden">
                                 <div class="px-4 py-3 border-b border-slate-800 bg-slate-900/50">
-                                    <p class="text-sm font-medium text-white">Ayush Developer</p>
-                                    <p class="text-xs text-slate-400 truncate">user@devsentry.ai</p>
+                                    <p class="text-sm font-medium text-white" id="dropdown-user-name">User</p>
+                                    <p class="text-xs text-slate-400 truncate" id="dropdown-user-email">user@devsentry.ai</p>
                                 </div>
                                 <div class="py-1">
-                                    <button onclick="app.navigate('dashboard')" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex gap-2"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> My Dashboard</button>
-                                    <button onclick="app.navigate('history')" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex gap-2"><i data-lucide="test-tubes" class="w-4 h-4"></i> My Audits</button>
+                                    <button onclick="app.navigate('dashboard')" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex gap-2 transition"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> My Dashboard</button>
+                                    <button onclick="app.navigate('history')" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex gap-2 transition"><i data-lucide="history" class="w-4 h-4"></i> My Audits</button>
                                 </div>
                                 <div class="py-1 border-t border-slate-800">
-                                    <button onclick="app.mockSignOut()" class="w-full text-left px-4 py-2 text-sm text-rose-400 hover:bg-rose-500/10 flex gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
+                                    <button onclick="app.mockSignOut()" class="w-full text-left px-4 py-2 text-sm text-rose-400 hover:bg-rose-500/10 flex gap-2 transition"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
                                 </div>
                             </div>
                         </div>
@@ -198,7 +198,7 @@
                         <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 relative z-10">Find Bugs Before They Become <span class="text-brand-400 glow-text">Problems</span></h1>
                         <p class="text-lg text-slate-400 mb-8 max-w-2xl mx-auto relative z-10">AI-powered debugging, security analysis, and complexity optimization.</p>
                         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
-                            <button onclick="app.navigate('audit')" class="px-8 py-3.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-semibold shadow-lg transition flex gap-2 transform hover:scale-105">
+                            <button onclick="app.navigate('audit')" class="px-8 py-3.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-semibold shadow-lg transition flex gap-2 transform hover:scale-105 justify-center">
                                 <i data-lucide="play" class="w-5 h-5"></i> Start Code Audit
                             </button>
                         </div>
@@ -207,29 +207,50 @@
                     <!-- Quick Actions -->
                     <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-                        <button onclick="app.navigate('audit')" class="glass-panel p-5 rounded-xl text-left hover:bg-slate-800/50 transition group flex flex-col border-slate-800 hover:border-brand-500/50">
-                            <div class="bg-brand-500/10 p-2.5 rounded-lg text-brand-400 mb-3"><i data-lucide="terminal-square" class="w-6 h-6"></i></div>
+                        <button onclick="app.resetAndNavigate('audit')" class="glass-panel p-5 rounded-xl text-left hover:bg-slate-800/50 transition group flex flex-col border-slate-800 hover:border-brand-500/50 shadow-sm">
+                            <div class="bg-brand-500/10 p-2.5 rounded-lg text-brand-400 mb-3 w-fit"><i data-lucide="terminal-square" class="w-6 h-6"></i></div>
                             <h3 class="font-semibold text-white group-hover:text-brand-400 transition">New Code Audit</h3>
                             <p class="text-xs text-slate-400 mt-1 mb-3">Analyze source code instantly.</p>
                             <span class="text-xs font-medium text-brand-400 mt-auto flex items-center gap-1">Start <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
                         </button>
-                        <button onclick="app.navigate('history')" class="glass-panel p-5 rounded-xl text-left hover:bg-slate-800/50 transition group flex flex-col border-slate-800 hover:border-emerald-500/50">
-                            <div class="bg-emerald-500/10 p-2.5 rounded-lg text-emerald-400 mb-3"><i data-lucide="history" class="w-6 h-6"></i></div>
+                        <button onclick="app.navigate('security')" class="glass-panel p-5 rounded-xl text-left hover:bg-slate-800/50 transition group flex flex-col border-slate-800 hover:border-rose-500/50 shadow-sm">
+                            <div class="bg-rose-500/10 p-2.5 rounded-lg text-rose-400 mb-3 w-fit"><i data-lucide="shield-alert" class="w-6 h-6"></i></div>
+                            <h3 class="font-semibold text-white group-hover:text-rose-400 transition">Security Scan</h3>
+                            <p class="text-xs text-slate-400 mt-1 mb-3">Find vulnerabilities & exploits.</p>
+                            <span class="text-xs font-medium text-rose-400 mt-auto flex items-center gap-1">Scan <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
+                        </button>
+                        <button onclick="app.navigate('history')" class="glass-panel p-5 rounded-xl text-left hover:bg-slate-800/50 transition group flex flex-col border-slate-800 hover:border-emerald-500/50 shadow-sm">
+                            <div class="bg-emerald-500/10 p-2.5 rounded-lg text-emerald-400 mb-3 w-fit"><i data-lucide="history" class="w-6 h-6"></i></div>
                             <h3 class="font-semibold text-white group-hover:text-emerald-400 transition">View History</h3>
                             <p class="text-xs text-slate-400 mt-1 mb-3">Access past audit reports.</p>
                             <span class="text-xs font-medium text-emerald-400 mt-auto flex items-center gap-1">Open <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
                         </button>
+                        <button onclick="app.navigate('reports')" class="glass-panel p-5 rounded-xl text-left hover:bg-slate-800/50 transition group flex flex-col border-slate-800 hover:border-amber-500/50 shadow-sm">
+                            <div class="bg-amber-500/10 p-2.5 rounded-lg text-amber-400 mb-3 w-fit"><i data-lucide="file-bar-chart-2" class="w-6 h-6"></i></div>
+                            <h3 class="font-semibold text-white group-hover:text-amber-400 transition">Generate Report</h3>
+                            <p class="text-xs text-slate-400 mt-1 mb-3">Export codebase summaries.</p>
+                            <span class="text-xs font-medium text-amber-400 mt-auto flex items-center gap-1">View <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
+                        </button>
                     </div>
 
                     <!-- Statistics -->
+                    <h2 class="text-lg font-semibold text-white mb-4">Your Lifetime Stats</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-xl border-l-4 border-l-brand-500 hover:bg-slate-800/40 cursor-pointer transition group">
-                            <p class="text-sm font-medium text-slate-400 mb-1 group-hover:text-slate-300">Total Audits</p>
-                            <p class="text-3xl font-bold text-white">124</p>
+                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-xl border-l-4 border-l-brand-500 hover:bg-slate-800/40 cursor-pointer transition group shadow-sm">
+                            <p class="text-sm font-medium text-slate-400 mb-1 group-hover:text-slate-300 transition">Total Audits</p>
+                            <p class="text-3xl font-bold text-white" id="stat-total">0</p>
                         </div>
-                        <div onclick="app.navigate('audit', 'tab-issues')" class="glass-panel p-6 rounded-xl border-l-4 border-l-rose-500 hover:bg-slate-800/40 cursor-pointer transition group">
-                            <p class="text-sm font-medium text-slate-400 mb-1 group-hover:text-slate-300">Bugs Detected</p>
-                            <p class="text-3xl font-bold text-white">47</p>
+                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-500 hover:bg-slate-800/40 cursor-pointer transition group shadow-sm">
+                            <p class="text-sm font-medium text-slate-400 mb-1 group-hover:text-slate-300 transition">Avg Quality Score</p>
+                            <p class="text-3xl font-bold text-white" id="stat-avg">0</p>
+                        </div>
+                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-xl border-l-4 border-l-rose-500 hover:bg-slate-800/40 cursor-pointer transition group shadow-sm">
+                            <p class="text-sm font-medium text-slate-400 mb-1 group-hover:text-slate-300 transition">Bugs Found</p>
+                            <p class="text-3xl font-bold text-white" id="stat-bugs">0</p>
+                        </div>
+                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-500 hover:bg-slate-800/40 cursor-pointer transition group shadow-sm">
+                            <p class="text-sm font-medium text-slate-400 mb-1 group-hover:text-slate-300 transition">Sec Vulnerabilities</p>
+                            <p class="text-3xl font-bold text-white" id="stat-sec">0</p>
                         </div>
                     </div>
 
@@ -241,12 +262,12 @@
                  ============================== -->
             <section id="view-audit" class="view-section flex-1 p-4 lg:p-6 pb-24">
                 <div class="max-w-[1600px] mx-auto w-full h-full flex flex-col gap-4">
-                    <div class="flex justify-between items-center mb-2">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
                         <h2 class="text-xl font-bold text-white">Code Audit & Analysis</h2>
-                        <div class="flex gap-2">
-                            <button onclick="app.loadTemplate('java')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-md border border-slate-700 transition">Analyze Java</button>
-                            <button onclick="app.loadTemplate('cpp')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-md border border-slate-700 transition">Analyze C++</button>
-                            <button onclick="app.loadTemplate('python')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-md border border-slate-700 transition">Analyze Python</button>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="app.loadTemplate('java')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-md border border-slate-700 transition">Load Java Demo</button>
+                            <button onclick="app.loadTemplate('cpp')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-md border border-slate-700 transition">Load C++ Demo</button>
+                            <button onclick="app.loadTemplate('python')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-md border border-slate-700 transition">Load Python Demo</button>
                         </div>
                     </div>
 
@@ -254,17 +275,18 @@
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
                         
                         <!-- LEFT PANEL: EDITOR -->
-                        <div class="flex flex-col border border-slate-800/80 rounded-xl overflow-hidden bg-navy-950 shadow-lg min-h-[500px] xl:h-[800px] sticky top-20">
+                        <div class="flex flex-col border border-slate-800/80 rounded-xl overflow-hidden bg-navy-950 shadow-lg min-h-[500px] xl:h-[800px] xl:sticky xl:top-20">
                             <!-- Editor Toolbar -->
                             <div class="h-12 border-b border-slate-800/80 flex items-center justify-between px-4 bg-slate-900 shrink-0">
                                 <div class="flex items-center gap-4">
                                     <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2"><i data-lucide="file-code" class="w-4 h-4 text-brand-400"></i> Source Code</span>
                                     <div class="hidden sm:flex items-center gap-1 border-l border-slate-700 pl-4">
-                                        <button onclick="app.clearEditor()" class="p-1.5 text-slate-500 hover:text-white hover:bg-slate-800 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        <button onclick="app.clearEditor()" class="p-1.5 text-slate-500 hover:text-white hover:bg-slate-800 rounded transition" title="Clear Editor"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        <button onclick="app.copyCode()" class="p-1.5 text-slate-500 hover:text-white hover:bg-slate-800 rounded transition" title="Copy Code"><i data-lucide="copy" class="w-4 h-4"></i></button>
                                     </div>
                                 </div>
                                 <button id="btn-run-audit" onclick="app.runAudit()" class="bg-brand-600 hover:bg-brand-500 text-white px-4 py-1.5 rounded-md text-sm font-medium transition shadow-lg flex items-center gap-2">
-                                    <i data-lucide="zap" class="w-4 h-4 fill-current"></i> Run AI Audit
+                                    <i data-lucide="zap" class="w-4 h-4 fill-current"></i> <span id="btn-run-text">Run AI Audit</span>
                                 </button>
                             </div>
                             <!-- Monaco Container -->
@@ -279,11 +301,12 @@
                         <div class="flex flex-col bg-navy-950 border border-slate-800/80 rounded-xl overflow-hidden shadow-lg min-h-[500px]">
                             <div class="h-12 border-b border-slate-800/80 flex items-center justify-between px-4 bg-slate-900 shrink-0">
                                 <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> Audit Results</span>
+                                <button id="btn-download-report" onclick="app.downloadCurrentReport()" class="hidden text-xs text-brand-400 hover:text-brand-300 font-medium transition flex items-center gap-1"><i data-lucide="download" class="w-3 h-3"></i> Export</button>
                             </div>
 
                             <div class="flex-1 relative bg-navy-900/50">
                                 <!-- EMPTY STATE -->
-                                <div id="state-empty" class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-navy-950 z-20">
+                                <div id="state-empty" class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-navy-950 z-20 transition-opacity">
                                     <div class="bg-slate-800/40 p-6 rounded-full border border-slate-800 mb-6"><i data-lucide="bot" class="w-12 h-12 text-brand-400 opacity-80"></i></div>
                                     <h3 class="text-xl font-bold text-white mb-2">Ready for Inspection</h3>
                                     <p class="text-sm text-slate-400 max-w-sm mb-8">Paste your Java, C++, or Python code and click "Run AI Audit" to start.</p>
@@ -310,21 +333,21 @@
                                 <div id="state-error" class="hidden absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-navy-950 z-20">
                                     <div class="bg-rose-500/10 p-4 rounded-full border border-rose-500/20 mb-4"><i data-lucide="server-crash" class="w-8 h-8 text-rose-500"></i></div>
                                     <h3 class="text-lg font-medium text-rose-400 mb-2">AI Audit Failed</h3>
-                                    <p id="error-message" class="text-sm text-slate-400 max-w-sm mb-6">Unable to analyze the code. Please try again.</p>
-                                    <div class="flex gap-3">
+                                    <p id="error-message" class="text-sm text-slate-400 max-w-sm mb-6">Unable to connect to the backend API. The service might be offline.</p>
+                                    <div class="flex gap-3 justify-center">
                                         <button onclick="app.showEmpty()" class="px-4 py-2 bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700 hover:bg-slate-700 transition">Cancel</button>
                                         <button onclick="app.runAudit(true)" class="px-4 py-2 bg-brand-600 text-white text-sm rounded-md shadow-lg hover:bg-brand-500 transition flex items-center gap-2">
-                                            <i data-lucide="bot" class="w-4 h-4"></i> Use Demo Audit
+                                            <i data-lucide="bot" class="w-4 h-4"></i> Use Demo Fallback
                                         </button>
                                     </div>
                                 </div>
 
                                 <!-- RESULTS STATE -->
-                                <div id="state-results" class="hidden flex-col h-full bg-navy-950">
+                                <div id="state-results" class="hidden flex-col h-full bg-navy-950 overflow-y-auto">
                                     <!-- Top Score Card -->
                                     <div class="p-6 bg-gradient-to-b from-slate-900 to-navy-950 border-b border-slate-800/60 shrink-0">
                                         <div class="flex justify-between items-center cursor-pointer hover:opacity-80" onclick="app.switchTab('tab-overview')">
-                                            <div><h2 class="text-xl font-bold text-white flex items-center gap-2">OVERALL CODE QUALITY</h2></div>
+                                            <div><h2 class="text-xl font-bold text-white flex items-center gap-2">OVERALL CODE QUALITY <span id="demo-badge" class="hidden text-[10px] bg-brand-500/20 text-brand-400 px-2 py-0.5 rounded border border-brand-500/30">DEMO</span></h2></div>
                                             <div class="flex items-baseline gap-1"><span id="res-score" class="text-5xl font-bold tracking-tighter">0</span><span class="text-slate-500 font-medium">/ 100</span></div>
                                         </div>
                                         <div class="grid grid-cols-4 gap-2 mt-6">
@@ -348,7 +371,7 @@
                                     </div>
 
                                     <!-- Sticky Tabs -->
-                                    <div class="sticky top-0 z-10 bg-navy-950/90 backdrop-blur-md border-b border-slate-800/60 px-2 flex overflow-x-auto hide-scrollbar">
+                                    <div class="sticky top-0 z-10 bg-navy-950/90 backdrop-blur-md border-b border-slate-800/60 px-2 flex overflow-x-auto hide-scrollbar shrink-0 shadow-sm">
                                         <button class="tab-btn active px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-overview">Overview</button>
                                         <button class="tab-btn px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-issues">Bugs</button>
                                         <button class="tab-btn px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-security">Security</button>
@@ -398,6 +421,9 @@
 
                                         <!-- TAB: TEST CASES -->
                                         <div id="tab-tests" class="tab-content space-y-4">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <h3 class="text-sm font-semibold text-white">Suggested Test Cases</h3>
+                                            </div>
                                             <div id="tests-list" class="space-y-4"></div>
                                         </div>
 
@@ -410,26 +436,141 @@
             </section>
 
             <!-- ==============================
-                 OTHER VIEWS
+                 VIEW: HISTORY
                  ============================== -->
             <section id="view-history" class="view-section flex-1 p-6 lg:p-10 pb-24">
-                <div class="max-w-6xl mx-auto w-full"><h2 class="text-2xl font-bold text-white mb-6">Audit History</h2><div class="glass-panel p-24 rounded-xl text-center"><p class="text-slate-300">History Database Not Connected</p></div></div>
+                <div class="max-w-6xl mx-auto w-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-2"><i data-lucide="history" class="w-6 h-6 text-emerald-400"></i> Audit History</h2>
+                        <button onclick="app.clearHistory()" class="px-4 py-2 bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 text-sm font-medium rounded-md border border-slate-700 transition flex gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Clear</button>
+                    </div>
+                    
+                    <div class="glass-panel rounded-xl overflow-hidden border border-slate-800">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-900 border-b border-slate-800 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                                        <th class="p-4">Date</th>
+                                        <th class="p-4">Language</th>
+                                        <th class="p-4 text-center">Score</th>
+                                        <th class="p-4 text-center">Bugs</th>
+                                        <th class="p-4 text-center">Security</th>
+                                        <th class="p-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body" class="divide-y divide-slate-800">
+                                    <!-- History rows dynamically injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="history-empty" class="p-16 text-center hidden">
+                            <i data-lucide="inbox" class="w-12 h-12 text-slate-600 mx-auto mb-4"></i>
+                            <p class="text-slate-400 font-medium">No audits found in local history.</p>
+                            <button onclick="app.navigate('audit')" class="mt-4 text-brand-400 hover:text-brand-300 text-sm font-medium">Run your first audit</button>
+                        </div>
+                    </div>
+                </div>
             </section>
+
+            <!-- ==============================
+                 VIEW: REPORTS
+                 ============================== -->
             <section id="view-reports" class="view-section flex-1 p-6 lg:p-10 pb-24">
-                <div class="max-w-6xl mx-auto w-full"><h2 class="text-2xl font-bold text-white mb-6">Reports</h2><div class="glass-panel p-24 rounded-xl text-center"><p class="text-slate-300">Run an audit first to generate a report.</p></div></div>
+                <div class="max-w-6xl mx-auto w-full">
+                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2"><i data-lucide="file-bar-chart-2" class="w-6 h-6 text-amber-400"></i> Report Center</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-8 rounded-xl border border-slate-800">
+                            <h3 class="text-lg font-bold text-white mb-4">Latest Audit Report</h3>
+                            <p class="text-sm text-slate-400 mb-6">Download a complete breakdown of your most recent AI analysis, including metrics, security vulnerabilities, and code fixes.</p>
+                            <button onclick="app.downloadCurrentReport()" class="w-full px-4 py-3 bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-lg shadow-lg transition flex items-center justify-center gap-2">
+                                <i data-lucide="download-cloud" class="w-5 h-5"></i> Download PDF / JSON
+                            </button>
+                        </div>
+                        <div class="glass-panel p-8 rounded-xl border border-slate-800">
+                            <h3 class="text-lg font-bold text-white mb-4">Global Analytics</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                                    <span class="text-sm text-slate-400">Total Code Analyzed</span>
+                                    <span class="text-sm font-bold text-white" id="rep-total-audits">0 times</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                                    <span class="text-sm text-slate-400">Average Quality Score</span>
+                                    <span class="text-sm font-bold text-emerald-400" id="rep-avg-score">0 / 100</span>
+                                </div>
+                                <div class="flex justify-between items-center pb-2">
+                                    <span class="text-sm text-slate-400">Most Used Language</span>
+                                    <span class="text-sm font-bold text-brand-400" id="rep-top-lang">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
-            <section id="view-settings" class="view-section flex-1 p-6 lg:p-10 pb-24">
-                <div class="max-w-6xl mx-auto w-full"><h2 class="text-2xl font-bold text-white mb-6">Settings</h2><div class="glass-panel p-10 rounded-xl text-center"><p class="text-slate-300">Configuration panel</p></div></div>
-            </section>
+
+            <!-- ==============================
+                 VIEW: SECURITY SCAN
+                 ============================== -->
             <section id="view-security" class="view-section flex-1 p-6 lg:p-10 pb-24">
-                <div class="max-w-6xl mx-auto w-full"><h2 class="text-2xl font-bold text-white mb-6">Global Security Scan</h2><div class="glass-panel p-24 rounded-xl text-center"><p class="text-slate-300">Global scan unavailable. Please use Code Audit.</p></div></div>
+                <div class="max-w-4xl mx-auto w-full text-center py-10">
+                    <div class="inline-flex p-4 bg-rose-500/10 rounded-full mb-6 border border-rose-500/20">
+                        <i data-lucide="shield-alert" class="w-16 h-16 text-rose-500"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-white mb-4">Deep Security Scan</h2>
+                    <p class="text-slate-400 mb-10 max-w-xl mx-auto">Analyze your codebase exclusively for critical vulnerabilities, hardcoded secrets, injection vectors, and compliance violations using the DevSentry AI Security Engine.</p>
+                    
+                    <button onclick="app.startSecurityScan()" class="px-8 py-4 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl shadow-lg shadow-rose-500/20 transition flex items-center gap-3 mx-auto transform hover:scale-105">
+                        <i data-lucide="radar" class="w-6 h-6"></i> Initialize Security Scan
+                    </button>
+                    
+                    <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+                        <div class="bg-navy-950 p-4 rounded-lg border border-slate-800"><i data-lucide="database" class="w-5 h-5 text-slate-500 mb-2"></i><h4 class="text-sm font-semibold text-white">Injection Flaws</h4><p class="text-xs text-slate-500 mt-1">SQLi, XSS, Command Injection detection.</p></div>
+                        <div class="bg-navy-950 p-4 rounded-lg border border-slate-800"><i data-lucide="key" class="w-5 h-5 text-slate-500 mb-2"></i><h4 class="text-sm font-semibold text-white">Secret Leaks</h4><p class="text-xs text-slate-500 mt-1">API keys and hardcoded passwords.</p></div>
+                        <div class="bg-navy-950 p-4 rounded-lg border border-slate-800"><i data-lucide="cpu" class="w-5 h-5 text-slate-500 mb-2"></i><h4 class="text-sm font-semibold text-white">Memory Safety</h4><p class="text-xs text-slate-500 mt-1">Buffer overflows & memory leaks.</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==============================
+                 VIEW: SETTINGS
+                 ============================== -->
+            <section id="view-settings" class="view-section flex-1 p-6 lg:p-10 pb-24">
+                <div class="max-w-3xl mx-auto w-full">
+                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2"><i data-lucide="settings" class="w-6 h-6 text-slate-400"></i> Settings</h2>
+                    <div class="glass-panel p-6 rounded-xl border border-slate-800 space-y-6">
+                        
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-6">
+                            <div>
+                                <h3 class="text-base font-semibold text-white">Dark Mode</h3>
+                                <p class="text-sm text-slate-400">Toggle dark/light theme (Always dark in demo).</p>
+                            </div>
+                            <button onclick="app.showAlert('Info', 'Dark mode is permanently enabled for DevSentry AI.')" class="bg-slate-700 w-12 h-6 rounded-full relative transition"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
+                        </div>
+                        
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-6">
+                            <div>
+                                <h3 class="text-base font-semibold text-white">Auto-Format Code</h3>
+                                <p class="text-sm text-slate-400">Format code before audit execution.</p>
+                            </div>
+                            <button class="bg-brand-600 w-12 h-6 rounded-full relative transition"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-base font-semibold text-rose-400">Reset Local Data</h3>
+                                <p class="text-sm text-slate-400">Clear all history, reports, and local storage.</p>
+                            </div>
+                            <button onclick="app.clearHistory(); app.mockSignOut(); app.showAlert('Success', 'Local data cleared successfully.')" class="px-4 py-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded text-sm font-medium transition border border-rose-500/20 hover:border-rose-500">Reset Data</button>
+                        </div>
+
+                    </div>
+                </div>
             </section>
 
         </main>
     </div>
 
     <!-- Scroll to Top -->
-    <button onclick="window.scrollTo({top:0, behavior:'smooth'})" id="fab-top" class="fixed bottom-6 right-6 p-3 bg-brand-600 text-white rounded-full shadow-xl transform scale-0 transition z-40"><i data-lucide="arrow-up" class="w-5 h-5"></i></button>
+    <button onclick="window.scrollTo({top:0, behavior:'smooth'})" id="fab-top" class="fixed bottom-6 right-6 p-3 bg-brand-600 hover:bg-brand-500 text-white rounded-full shadow-xl transform scale-0 transition-all z-40 focus:outline-none"><i data-lucide="arrow-up" class="w-5 h-5"></i></button>
 
     <script>
         const app = {
@@ -437,19 +578,31 @@
             currentView: 'dashboard',
             isAuditing: false,
             decorations: [],
+            currentAuditData: null,
+            history: [],
             
             init() {
-                lucide.createIcons();
-                this.setupTabs();
-                this.setupEditor();
-                this.navigate('dashboard');
-                window.addEventListener('scroll', () => {
-                    const fab = document.getElementById('fab-top');
-                    if (window.scrollY > 300) fab.classList.replace('scale-0', 'scale-100');
-                    else fab.classList.replace('scale-100', 'scale-0');
-                });
+                try {
+                    lucide.createIcons();
+                    this.setupTabs();
+                    this.setupEditor();
+                    this.loadAuth();
+                    this.loadHistory();
+                    this.navigate('dashboard');
+                    
+                    window.addEventListener('scroll', () => {
+                        const fab = document.getElementById('fab-top');
+                        if(fab) {
+                            if (window.scrollY > 300) fab.classList.replace('scale-0', 'scale-100');
+                            else fab.classList.replace('scale-100', 'scale-0');
+                        }
+                    });
+                } catch(err) {
+                    console.error("Initialization error:", err);
+                }
             },
 
+            // ROUTING & NAVIGATION
             navigate(viewId, targetTab = null) {
                 window.scrollTo(0, 0);
                 document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
@@ -459,25 +612,43 @@
                 if (view) view.classList.add('active');
                 
                 document.querySelectorAll(`.nav-link[data-target="${viewId}"]`).forEach(el => el.classList.add('active'));
-                document.getElementById('breadcrumb-current').textContent = viewId.charAt(0).toUpperCase() + viewId.slice(1).replace('-', ' ');
+                
+                const breadcrumb = document.getElementById('breadcrumb-current');
+                if(breadcrumb) breadcrumb.textContent = viewId.charAt(0).toUpperCase() + viewId.slice(1).replace('-', ' ');
 
                 this.currentView = viewId;
                 if(window.innerWidth < 768) this.toggleSidebar(false);
+                
                 if (viewId === 'audit') {
                     if (this.editor) setTimeout(() => this.editor.layout(), 100);
                     // Focus editor if empty state
-                    if(!document.getElementById('state-empty').classList.contains('hidden') && this.editor) {
+                    if(document.getElementById('state-empty') && !document.getElementById('state-empty').classList.contains('hidden') && this.editor) {
                         this.editor.focus();
                     }
                 }
+                
+                if (viewId === 'history') this.renderHistory();
+                if (viewId === 'reports') this.renderReportsStats();
+
                 if (viewId === 'audit' && targetTab) this.switchTab(targetTab);
+            },
+
+            resetAndNavigate(viewId) {
+                if(viewId === 'audit') {
+                    this.clearEditor();
+                    this.showEmpty();
+                }
+                this.navigate(viewId);
             },
 
             toggleSidebar(forceState = null) {
                 const s = document.getElementById('sidebar');
                 const o = document.getElementById('sidebar-overlay');
+                if(!s || !o) return;
+                
                 const isClosed = s.classList.contains('-translate-x-full');
                 const open = forceState !== null ? forceState : isClosed;
+                
                 if (open) {
                     s.classList.remove('-translate-x-full'); o.classList.remove('hidden');
                     setTimeout(() => o.classList.remove('opacity-0'), 10);
@@ -487,43 +658,72 @@
                 }
             },
 
-            toggleTheme() { alert("Theme toggling is currently in demo mode."); },
+            toggleTheme() { this.showAlert("Theme", "DevSentry AI is currently locked in Dark Mode for optimal focus."); },
 
-            // Modals & Auth
-            openAuthModal() { const m = document.getElementById('auth-modal'); m.classList.remove('hidden'); setTimeout(() => m.classList.remove('opacity-0'), 10); },
-            closeAuthModal() { const m = document.getElementById('auth-modal'); m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); },
-            mockSignIn() {
-                const btn = document.getElementById('btn-signin');
-                if(btn) btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>`;
-                lucide.createIcons();
-                setTimeout(() => {
-                    this.closeAuthModal();
+            // AUTHENTICATION
+            loadAuth() {
+                const user = localStorage.getItem('devsentry_user');
+                if(user) {
+                    const data = JSON.parse(user);
                     document.getElementById('auth-logged-out').classList.add('hidden');
                     document.getElementById('auth-logged-in').classList.remove('hidden');
+                    document.getElementById('user-name').textContent = data.name;
+                    document.getElementById('dropdown-user-name').textContent = data.name;
+                    document.getElementById('dropdown-user-email').textContent = data.email;
+                }
+            },
+            openAuthModal() { const m = document.getElementById('auth-modal'); if(m) { m.classList.remove('hidden'); setTimeout(() => m.classList.remove('opacity-0'), 10); } },
+            closeAuthModal() { const m = document.getElementById('auth-modal'); if(m) { m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); } },
+            mockSignIn() {
+                const btn = document.getElementById('btn-signin');
+                const email = document.getElementById('auth-email').value || 'demo@devsentry.ai';
+                const name = email.split('@')[0].toUpperCase();
+                
+                if(btn) btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>`;
+                lucide.createIcons();
+                
+                setTimeout(() => {
+                    const userData = { email, name };
+                    localStorage.setItem('devsentry_user', JSON.stringify(userData));
+                    this.loadAuth();
+                    this.closeAuthModal();
                     if(btn) btn.innerHTML = `Sign In`;
+                    this.showAlert("Success", `Welcome back, ${name}!`);
                 }, 1000);
             },
             mockSignOut() {
+                localStorage.removeItem('devsentry_user');
                 document.getElementById('auth-logged-in').classList.add('hidden');
                 document.getElementById('auth-logged-out').classList.remove('hidden');
                 this.toggleUserDropdown(false);
+                this.navigate('dashboard');
+                this.showAlert("Signed Out", "You have been successfully signed out.");
             },
             toggleUserDropdown(e) {
                 if(e && e.stopPropagation) e.stopPropagation();
+                if(e === false) { document.getElementById('user-dropdown').classList.add('hidden'); return; }
                 const dd = document.getElementById('user-dropdown');
+                if(!dd) return;
                 if (dd.classList.contains('hidden')) { dd.classList.remove('hidden'); setTimeout(() => dd.classList.remove('opacity-0'), 10); } 
                 else { dd.classList.add('opacity-0'); setTimeout(() => dd.classList.add('hidden'), 200); }
             },
 
-            showAlert(title, msg) {
+            // ALERTS
+            showAlert(title, msg, icon = "info", color = "brand") {
                 document.getElementById('alert-title').textContent = title;
                 document.getElementById('alert-message').textContent = msg;
+                const iconEl = document.getElementById('alert-icon');
+                if(iconEl) {
+                    iconEl.setAttribute('data-lucide', icon);
+                    iconEl.className = `w-12 h-12 text-${color}-400 mx-auto mb-4`;
+                    lucide.createIcons();
+                }
                 const m = document.getElementById('alert-modal');
-                m.classList.remove('hidden'); setTimeout(() => m.classList.remove('opacity-0'), 10);
+                if(m) { m.classList.remove('hidden'); setTimeout(() => m.classList.remove('opacity-0'), 10); }
             },
             closeAlert() {
                 const m = document.getElementById('alert-modal');
-                m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300);
+                if(m) { m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); }
             },
 
             // TABS
@@ -544,24 +744,32 @@
 
             // EDITOR
             setupEditor() {
+                if(typeof require === 'undefined') return;
                 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
                 require(['vs/editor/editor.main'], () => {
                     document.getElementById('editor-loading').style.display = 'none';
                     this.editor = monaco.editor.create(document.getElementById('editor-container'), {
                         value: "", language: 'java', theme: 'vs-dark', automaticLayout: true,
-                        fontFamily: '"Fira Code", monospace', fontSize: 14, minimap: { enabled: false }, padding: { top: 16 }
+                        fontFamily: '"Fira Code", monospace', fontSize: 14, minimap: { enabled: false }, padding: { top: 16 }, scrollBeyondLastLine: false
                     });
                 });
             },
             changeLanguage(val) {
-                document.getElementById('global-lang-select').value = val;
+                const select = document.getElementById('global-lang-select');
+                if(select) select.value = val;
                 if (this.editor) monaco.editor.setModelLanguage(this.editor.getModel(), val);
             },
             clearEditor() {
                 if (this.editor) this.editor.setValue("");
                 this.showEmpty();
             },
-            formatCode() { if (this.editor) this.editor.getAction('editor.action.formatDocument').run(); },
+            copyCode() {
+                if (!this.editor) return;
+                const code = this.editor.getValue();
+                navigator.clipboard.writeText(code).then(() => {
+                    this.showAlert("Copied", "Source code copied to clipboard.", "copy", "emerald");
+                });
+            },
             loadTemplate(lang) {
                 this.navigate('audit');
                 this.changeLanguage(lang);
@@ -578,7 +786,6 @@
                 this.editor.setPosition({lineNumber: lineNum, column: 1});
                 this.editor.focus();
                 
-                // Clear old decos
                 this.decorations = this.editor.deltaDecorations(this.decorations, [
                     { range: new monaco.Range(lineNum,1,lineNum,1), options: { isWholeLine: true, className: 'monaco-highlight-line' } }
                 ]);
@@ -594,22 +801,25 @@
             },
             applyFixCode(codeToApply, issueId) {
                 if (!this.editor) return;
-                // For simplicity in this demo, we replace the entire editor content if the fix provides full code.
-                // Or we just insert it at cursor. The mock returns partial fixes, so we'll just replace the content 
-                // but in a real app you'd do text edits. For this requirement, we show it works.
                 this.editor.setValue(codeToApply);
-                this.showAlert("Fix Applied", "The AI fix has been applied to your code editor.");
+                this.showAlert("Fix Applied", "The AI fix has been applied to your code editor.", "check-circle", "emerald");
                 if(issueId) this.showFixUI(issueId);
             },
 
-            generateTestCases() {
-                this.switchTab('tab-tests');
+            startSecurityScan() {
+                this.navigate('audit');
+                this.loadTemplate('java');
+                setTimeout(() => this.runAudit(true), 500);
             },
 
-            // AUDIT
+            // AUDIT LOGIC
             showEmpty() {
-                ['state-loading', 'state-error', 'state-results'].forEach(id => document.getElementById(id).classList.add('hidden'));
-                document.getElementById('state-empty').classList.remove('hidden');
+                ['state-loading', 'state-error', 'state-results'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) el.classList.add('hidden');
+                });
+                const empty = document.getElementById('state-empty');
+                if(empty) empty.classList.remove('hidden');
             },
 
             async runAudit(forceMock = false) {
@@ -618,19 +828,21 @@
 
                 const code = this.editor.getValue();
                 if (!code.trim()) { 
-                    this.showAlert("No code detected", "Please paste your Java, C++, or Python code before starting the audit.");
+                    this.showAlert("No code detected", "Please paste your Java, C++, or Python code before starting the audit.", "alert-circle", "rose");
                     return; 
                 }
 
-                const lang = document.getElementById('global-lang-select').value;
+                const langSelect = document.getElementById('global-lang-select');
+                const lang = langSelect ? langSelect.value : 'java';
 
                 this.isAuditing = true;
                 ['state-empty', 'state-error', 'state-results'].forEach(id => document.getElementById(id).classList.add('hidden'));
                 document.getElementById('state-loading').classList.remove('hidden');
                 
                 const btnRun = document.getElementById('btn-run-audit');
-                btnRun.disabled = true;
-                btnRun.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Analyzing...`;
+                const btnRunText = document.getElementById('btn-run-text');
+                if(btnRun) btnRun.disabled = true;
+                if(btnRunText) btnRunText.textContent = "Analyzing...";
                 lucide.createIcons();
 
                 this.animateLoadingSteps();
@@ -638,7 +850,7 @@
                 try {
                     let data;
                     if (forceMock) {
-                        await new Promise(r => setTimeout(r, 2500));
+                        await new Promise(r => setTimeout(r, 2000)); // Simulate network latency
                         data = this.generateMockData(lang, code);
                     } else {
                         try {
@@ -648,16 +860,21 @@
                             });
                             if (!response.ok) throw new Error("HTTP " + response.status);
                             data = await response.json();
-                        } catch (apiErr) { throw apiErr; } 
+                        } catch (apiErr) { 
+                            console.warn("Real API failed, falling back to mock or showing error.", apiErr);
+                            throw apiErr; 
+                        } 
                     }
-                    this.renderResults(data, code);
+                    this.currentAuditData = data;
+                    this.renderResults(data, code, forceMock);
+                    this.saveAuditToHistory(data, lang, code);
                 } catch (err) {
                     document.getElementById('state-loading').classList.add('hidden');
                     document.getElementById('state-error').classList.remove('hidden');
                 } finally {
                     this.isAuditing = false;
-                    btnRun.disabled = false;
-                    btnRun.innerHTML = `<i data-lucide="zap" class="w-4 h-4 fill-current"></i> Run AI Audit`;
+                    if(btnRun) btnRun.disabled = false;
+                    if(btnRunText) btnRunText.textContent = "Run AI Audit";
                     lucide.createIcons();
                 }
             },
@@ -665,40 +882,50 @@
             animateLoadingSteps() {
                 const texts = ["Parsing source code", "Checking syntax", "Detecting bugs", "Checking security", "Analyzing complexity", "Generating recommendations"];
                 const steps = [1,2,3,4,5].map(i => document.getElementById(`step-${i}`));
-                steps.forEach((s, i) => { s.className = "flex items-center gap-3 text-slate-600"; s.innerHTML = `<i data-lucide="circle" class="w-4 h-4"></i> ${texts[i]}`; });
+                steps.forEach((s, i) => { if(s) { s.className = "flex items-center gap-3 text-slate-600"; s.innerHTML = `<i data-lucide="circle" class="w-4 h-4"></i> ${texts[i]}`; }});
                 lucide.createIcons();
 
                 let current = 0;
                 const interval = setInterval(() => {
                     if(!this.isAuditing) { clearInterval(interval); return; }
-                    if (current > 0 && current <= steps.length) {
+                    if (current > 0 && current <= steps.length && steps[current-1]) {
                         steps[current-1].className = "flex items-center gap-3 text-emerald-400";
                         steps[current-1].innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i> ${texts[current-1]}`;
                     }
-                    if (current < steps.length) {
+                    if (current < steps.length && steps[current]) {
                         steps[current].className = "flex items-center gap-3 text-brand-400";
                         steps[current].innerHTML = `<i data-lucide="circle-dashed" class="w-4 h-4 animate-spin"></i> ${texts[current]}`;
                         lucide.createIcons();
                         current++;
                     } else { clearInterval(interval); }
-                }, 400);
+                }, 350);
             },
 
-            renderResults(data, originalCode) {
+            renderResults(data, originalCode, isDemo) {
+                // Badges
+                const badge = document.getElementById('demo-badge');
+                if(badge) isDemo ? badge.classList.remove('hidden') : badge.classList.add('hidden');
+                
+                const btnDownload = document.getElementById('btn-download-report');
+                if(btnDownload) btnDownload.classList.remove('hidden');
+
                 const s = data.score || data.qualityScore || 0;
-                document.getElementById('res-score').className = `text-5xl font-bold tracking-tighter ${s >= 80 ? 'text-emerald-400' : s >= 60 ? 'text-amber-400' : 'text-rose-400'}`;
-                document.getElementById('res-score').textContent = s;
+                const resScore = document.getElementById('res-score');
+                if(resScore) {
+                    resScore.className = `text-5xl font-bold tracking-tighter ${s >= 80 ? 'text-emerald-400' : s >= 60 ? 'text-amber-400' : 'text-rose-400'}`;
+                    resScore.textContent = s;
+                }
 
                 const issues = data.issues || [];
                 const bugs = issues.filter(i => i.issueType !== 'SECURITY' && i.issueType !== 'PERFORMANCE');
                 const sec = issues.filter(i => i.issueType === 'SECURITY');
                 const perf = issues.filter(i => i.issueType === 'PERFORMANCE');
 
-                document.getElementById('res-stat-bugs').textContent = bugs.length;
-                document.getElementById('res-stat-sec').textContent = sec.length;
-                document.getElementById('res-stat-perf').textContent = perf.length;
-                document.getElementById('res-stat-smells').textContent = data.quality ? (data.quality.smells || 0) : 0;
-                document.getElementById('res-summary').textContent = data.summary;
+                if(document.getElementById('res-stat-bugs')) document.getElementById('res-stat-bugs').textContent = bugs.length;
+                if(document.getElementById('res-stat-sec')) document.getElementById('res-stat-sec').textContent = sec.length;
+                if(document.getElementById('res-stat-perf')) document.getElementById('res-stat-perf').textContent = perf.length;
+                if(document.getElementById('res-stat-smells')) document.getElementById('res-stat-smells').textContent = data.quality ? (data.quality.smells || 0) : 0;
+                if(document.getElementById('res-summary')) document.getElementById('res-summary').textContent = data.summary;
 
                 // Lists
                 this.renderIssueList('issues-list', bugs, "No bugs found! Great job.");
@@ -706,42 +933,52 @@
 
                 // Performance
                 const pList = document.getElementById('perf-list');
-                pList.innerHTML = '';
-                (data.performance || ["Code path is optimal."]).forEach(p => pList.innerHTML += `<li class="flex gap-2 text-slate-300"><i data-lucide="zap" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i> ${p}</li>`);
+                if(pList) {
+                    pList.innerHTML = '';
+                    (data.performance || ["Code path is optimal."]).forEach(p => pList.innerHTML += `<li class="flex gap-2 text-slate-300"><i data-lucide="zap" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i> ${p}</li>`);
+                }
 
                 // Complexity
                 if (data.complexity) {
-                    document.getElementById('comp-time').textContent = data.complexity.time;
-                    document.getElementById('comp-time-desc').textContent = data.complexity.timeExplanation;
-                    document.getElementById('comp-space').textContent = data.complexity.space;
-                    document.getElementById('comp-space-desc').textContent = data.complexity.spaceExplanation;
+                    if(document.getElementById('comp-time')) document.getElementById('comp-time').textContent = data.complexity.time;
+                    if(document.getElementById('comp-time-desc')) document.getElementById('comp-time-desc').textContent = data.complexity.timeExplanation;
+                    if(document.getElementById('comp-space')) document.getElementById('comp-space').textContent = data.complexity.space;
+                    if(document.getElementById('comp-space-desc')) document.getElementById('comp-space-desc').textContent = data.complexity.spaceExplanation;
                 }
 
                 // Tests
                 const tList = document.getElementById('tests-list');
-                tList.innerHTML = '';
-                (data.testCases || []).forEach((tc, i) => {
-                    tList.innerHTML += `
-                        <div class="glass-panel p-4 rounded-xl border-l-2 border-l-brand-500">
-                            <h4 class="text-sm font-semibold text-brand-400 mb-2">Test Case ${i+1}: ${tc.purpose}</h4>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="bg-navy-950 p-2 rounded border border-slate-800"><span class="text-xs text-slate-500 block mb-1">Input</span><code class="text-sm text-slate-300 code-font">${tc.input}</code></div>
-                                <div class="bg-navy-950 p-2 rounded border border-slate-800"><span class="text-xs text-slate-500 block mb-1">Expected Output</span><code class="text-sm text-emerald-400 code-font">${tc.expected}</code></div>
-                            </div>
-                        </div>`;
-                });
+                if(tList) {
+                    tList.innerHTML = '';
+                    if (!data.testCases || data.testCases.length === 0) {
+                        tList.innerHTML = `<div class="p-6 text-center text-slate-400 glass-panel rounded-xl">No test cases generated.</div>`;
+                    } else {
+                        data.testCases.forEach((tc, i) => {
+                            tList.innerHTML += `
+                                <div class="glass-panel p-4 rounded-xl border-l-2 border-l-brand-500">
+                                    <h4 class="text-sm font-semibold text-brand-400 mb-2">Test Case ${i+1}: ${tc.purpose}</h4>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="bg-navy-950 p-2 rounded border border-slate-800"><span class="text-xs text-slate-500 block mb-1">Input</span><code class="text-sm text-slate-300 code-font">${tc.input}</code></div>
+                                        <div class="bg-navy-950 p-2 rounded border border-slate-800"><span class="text-xs text-slate-500 block mb-1">Expected Output</span><code class="text-sm text-emerald-400 code-font">${tc.expected}</code></div>
+                                    </div>
+                                </div>`;
+                        });
+                    }
+                }
 
-                // Quality
+                // Quality Bars
                 const qb = document.getElementById('quality-bars');
-                qb.innerHTML = '';
-                Object.entries(data.quality || { readability: 85, maintainability: 70 }).forEach(([k, v]) => {
-                    if (k === 'smells') return;
-                    qb.innerHTML += `
-                        <div>
-                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-300 capitalize">${k}</span><span class="text-slate-400">${v}/100</span></div>
-                            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden"><div class="bg-brand-500 h-full rounded-full" style="width: ${v}%"></div></div>
-                        </div>`;
-                });
+                if(qb) {
+                    qb.innerHTML = '';
+                    Object.entries(data.quality || { readability: 85, maintainability: 70 }).forEach(([k, v]) => {
+                        if (k === 'smells') return;
+                        qb.innerHTML += `
+                            <div>
+                                <div class="flex justify-between text-xs mb-1"><span class="text-slate-300 capitalize">${k}</span><span class="text-slate-400">${v}/100</span></div>
+                                <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden"><div class="bg-brand-500 h-full rounded-full" style="width: ${v}%"></div></div>
+                            </div>`;
+                    });
+                }
 
                 document.getElementById('state-loading').classList.add('hidden');
                 document.getElementById('state-results').classList.remove('hidden');
@@ -753,6 +990,7 @@
 
             renderIssueList(containerId, list, emptyMsg) {
                 const container = document.getElementById(containerId);
+                if(!container) return;
                 container.innerHTML = '';
                 if (list.length === 0) {
                     container.innerHTML = `<div class="p-6 text-center text-emerald-400 glass-panel rounded-xl flex flex-col items-center"><i data-lucide="check-circle" class="w-8 h-8 mb-2"></i>${emptyMsg}</div>`;
@@ -762,7 +1000,6 @@
                         const col = isCrit ? 'rose' : (issue.severity === 'MEDIUM' ? 'amber' : 'blue');
                         const issueId = `${containerId}-${idx}`;
                         
-                        // Extract problem code if available, else generic
                         let problemCode = "...";
                         if(this.editor && issue.lineNumber) {
                             problemCode = this.editor.getModel().getLineContent(issue.lineNumber).trim();
@@ -786,7 +1023,6 @@
                                     ${issue.fixCode ? `<button onclick="app.showFixUI('${issueId}')" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-xs font-medium text-white rounded shadow-lg transition">Fix This Bug</button>` : ''}
                                 </div>
 
-                                <!-- AI Fix UI -->
                                 <div id="fix-ui-${issueId}" class="hidden mt-4 bg-navy-950 border border-slate-800 rounded-lg overflow-hidden">
                                     <div class="grid grid-cols-1 md:grid-cols-2">
                                         <div class="border-b md:border-b-0 md:border-r border-slate-800">
@@ -806,6 +1042,109 @@
                             </div>`;
                     });
                 }
+            },
+
+            downloadCurrentReport() {
+                if(!this.currentAuditData) {
+                    this.showAlert("Error", "No audit data to export.", "alert-triangle", "rose");
+                    return;
+                }
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.currentAuditData, null, 2));
+                const node = document.createElement('a');
+                node.setAttribute("href", dataStr);
+                node.setAttribute("download", "DevSentry_Audit_Report.json");
+                document.body.appendChild(node);
+                node.click();
+                node.remove();
+                this.showAlert("Success", "Report downloaded successfully.", "download-cloud", "brand");
+            },
+
+            // HISTORY & REPORTS
+            loadHistory() {
+                const h = localStorage.getItem('devsentry_history');
+                if(h) this.history = JSON.parse(h);
+                this.updateDashboardStats();
+            },
+            saveAuditToHistory(data, lang, code) {
+                const issues = data.issues || [];
+                const entry = {
+                    id: Date.now(),
+                    date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
+                    lang: lang,
+                    score: data.score || data.qualityScore || 0,
+                    bugs: issues.filter(i => i.issueType !== 'SECURITY' && i.issueType !== 'PERFORMANCE').length,
+                    security: issues.filter(i => i.issueType === 'SECURITY').length
+                };
+                this.history.unshift(entry);
+                if(this.history.length > 50) this.history.pop();
+                localStorage.setItem('devsentry_history', JSON.stringify(this.history));
+                this.updateDashboardStats();
+            },
+            clearHistory() {
+                this.history = [];
+                localStorage.removeItem('devsentry_history');
+                this.renderHistory();
+                this.updateDashboardStats();
+                this.renderReportsStats();
+            },
+            renderHistory() {
+                const tbody = document.getElementById('history-table-body');
+                const empty = document.getElementById('history-empty');
+                if(!tbody || !empty) return;
+                
+                tbody.innerHTML = '';
+                if(this.history.length === 0) {
+                    empty.classList.remove('hidden');
+                    tbody.parentElement.classList.add('hidden');
+                } else {
+                    empty.classList.add('hidden');
+                    tbody.parentElement.classList.remove('hidden');
+                    this.history.forEach(h => {
+                        const scoreColor = h.score >= 80 ? 'text-emerald-400' : h.score >= 60 ? 'text-amber-400' : 'text-rose-400';
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-800/30 transition">
+                                <td class="p-4 text-sm text-slate-300">${h.date}</td>
+                                <td class="p-4"><span class="bg-slate-800 text-slate-300 px-2 py-1 rounded text-xs font-mono uppercase border border-slate-700">${h.lang}</span></td>
+                                <td class="p-4 text-center font-bold ${scoreColor}">${h.score}</td>
+                                <td class="p-4 text-center text-slate-300">${h.bugs}</td>
+                                <td class="p-4 text-center text-slate-300">${h.security}</td>
+                                <td class="p-4"><button onclick="app.loadTemplate('${h.lang}')" class="text-brand-400 hover:text-brand-300 text-sm font-medium transition flex items-center gap-1"><i data-lucide="eye" class="w-4 h-4"></i> View</button></td>
+                            </tr>
+                        `;
+                    });
+                }
+                lucide.createIcons();
+            },
+            updateDashboardStats() {
+                const total = this.history.length;
+                let bugs = 0, sec = 0, scoreSum = 0;
+                this.history.forEach(h => { bugs += h.bugs; sec += h.security; scoreSum += h.score; });
+                const avg = total > 0 ? Math.round(scoreSum / total) : 0;
+                
+                if(document.getElementById('stat-total')) document.getElementById('stat-total').textContent = total;
+                if(document.getElementById('stat-avg')) document.getElementById('stat-avg').textContent = avg;
+                if(document.getElementById('stat-bugs')) document.getElementById('stat-bugs').textContent = bugs;
+                if(document.getElementById('stat-sec')) document.getElementById('stat-sec').textContent = sec;
+            },
+            renderReportsStats() {
+                const total = this.history.length;
+                let scoreSum = 0;
+                let langCounts = {};
+                
+                this.history.forEach(h => {
+                    scoreSum += h.score;
+                    langCounts[h.lang] = (langCounts[h.lang] || 0) + 1;
+                });
+                
+                const avg = total > 0 ? Math.round(scoreSum / total) : 0;
+                let topLang = "-";
+                if(total > 0) {
+                    topLang = Object.keys(langCounts).reduce((a, b) => langCounts[a] > langCounts[b] ? a : b).toUpperCase();
+                }
+
+                if(document.getElementById('rep-total-audits')) document.getElementById('rep-total-audits').textContent = total + " times";
+                if(document.getElementById('rep-avg-score')) document.getElementById('rep-avg-score').textContent = avg + " / 100";
+                if(document.getElementById('rep-top-lang')) document.getElementById('rep-top-lang').textContent = topLang;
             },
 
             // DEMO SERVICE
@@ -855,10 +1194,10 @@
             }
         };
 
-        // Close dropdowns when clicking outside
+        // Event Listeners
         document.addEventListener('click', (e) => {
             const dd = document.getElementById('user-dropdown');
-            if (dd && !dd.classList.contains('hidden') && !e.target.closest('#auth-logged-in')) app.toggleUserDropdown();
+            if (dd && !dd.classList.contains('hidden') && !e.target.closest('#auth-logged-in')) app.toggleUserDropdown(false);
         });
 
         document.addEventListener('DOMContentLoaded', () => app.init());
