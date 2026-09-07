@@ -125,6 +125,20 @@
                     <div class="text-indigo-400 font-medium animate-pulse">Analyzing abstract syntax trees...</div>
                 </div>
 
+                <!-- State Error -->
+                <div id="state-error" class="hidden h-full flex flex-col items-center justify-center text-center space-y-4">
+                    <div class="bg-rose-500/10 p-4 rounded-full border border-rose-500/20">
+                        <i data-lucide="server-crash" class="w-8 h-8 text-rose-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-rose-400 font-medium text-lg">Connection Error</p>
+                        <p id="error-message" class="text-sm mt-2 text-slate-400 max-w-sm mx-auto">Could not connect to the backend server. Make sure your Spring Boot application is running on port 8080.</p>
+                    </div>
+                    <button id="retry-btn" class="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm rounded-md transition-colors border border-slate-700">
+                        Try Again
+                    </button>
+                </div>
+
                 <!-- State 3: Results -->
                 <div id="state-results" class="hidden space-y-6">
                     
@@ -251,6 +265,14 @@
         const stateLoading = document.getElementById('state-loading');
         const stateResults = document.getElementById('state-results');
 
+        const stateError = document.getElementById('state-error');
+        const errorMessage = document.getElementById('error-message');
+
+        document.getElementById('retry-btn').addEventListener('click', () => {
+            stateError.classList.add('hidden');
+            stateIdle.classList.remove('hidden');
+        });
+
         // Color mapping for severities
         const severityColors = {
             'CRITICAL': 'border-l-rose-500 bg-rose-500/5',
@@ -272,6 +294,7 @@
             const code = editor.getValue();
             
             if (!code.trim()) {
+                // Change to non-blocking UI indicator later if needed, simple alert for empty input is okay
                 alert("Please enter some source code to analyze.");
                 return;
             }
@@ -279,6 +302,7 @@
             // UI Transition: Show Loading State
             stateIdle.classList.add('hidden');
             stateResults.classList.add('hidden');
+            stateError.classList.add('hidden');
             stateLoading.classList.remove('hidden');
             
             // Disable button during analysis
@@ -297,17 +321,28 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`Server returned HTTP ${response.status}. Please check backend logs.`);
                 }
 
                 const data = await response.json();
+                
+                // Extra safety: check if data format matches expected
+                if (!data.issues) {
+                    throw new Error('Invalid response format from server.');
+                }
+                
                 renderResults(data);
 
             } catch (err) {
-                console.error(err);
-                alert("An error occurred during analysis.");
+                console.error("Audit Error:", err);
+                // Extract useful message if fetch failed completely (network error)
+                if (err.message.includes("Failed to fetch")) {
+                    errorMessage.textContent = "Could not connect to the backend. Ensure your Spring Boot app is running on port 8080 and CORS is enabled.";
+                } else {
+                    errorMessage.textContent = err.message;
+                }
                 stateLoading.classList.add('hidden');
-                stateIdle.classList.remove('hidden');
+                stateError.classList.remove('hidden');
             } finally {
                 // Restore button
                 btnRun.disabled = false;
