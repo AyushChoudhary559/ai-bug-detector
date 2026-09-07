@@ -288,64 +288,20 @@
             lucide.createIcons();
 
             try {
-                // SIMULATING A FETCH CALL TO `POST /api/v1/detector/analyze`
-                /*
-                const response = await fetch('/api/v1/detector/analyze', {
+                // Connect to the real Spring Boot backend
+                const language = document.getElementById('language-select').value;
+                const response = await fetch('http://localhost:8080/api/v1/detector/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ language: 'java', sourceCode: code })
+                    body: JSON.stringify({ language: language, sourceCode: code })
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
-                */
-
-                // Simulated network latency (1.5s to 2.5s)
-                await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
-                
-                // Simulated JSON Response matching the exact schema requested
-                const mockResponse = {
-                    summary: "The code contains a highly critical SQL Injection vulnerability due to raw string concatenation. Additionally, database resources (Connection, Statement, ResultSet) are not properly closed, leading to resource leaks.",
-                    totalBugsFound: 2,
-                    qualityScore: "35",
-                    issues: [
-                        {
-                            lineNumber: 4,
-                            issueType: "SECURITY",
-                            severity: "CRITICAL",
-                            description: "SQL Injection vector identified. User input is directly concatenated into the SQL query string, allowing attackers to manipulate the database.",
-                            recommendation: "Use PreparedStatement with parameterized queries instead of string concatenation."
-                        },
-                        {
-                            lineNumber: 7,
-                            issueType: "RESOURCE_LEAK",
-                            severity: "MEDIUM",
-                            description: "Database resources are opened but never closed. This will eventually exhaust connection pools.",
-                            recommendation: "Wrap the database logic in a try-with-resources block to ensure proper closure."
-                        }
-                    ],
-                    correctedCode: `public class UserAuth {
-    public boolean login(String user, String pass) {
-        String query = "SELECT * FROM users WHERE uname=? AND pword=?";
-        
-        // Using try-with-resources and PreparedStatement
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-             
-            pstmt.setString(1, user);
-            pstmt.setString(2, pass);
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                return rs.next();
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-}`
-                };
-
-                renderResults(mockResponse);
+                renderResults(data);
 
             } catch (err) {
                 console.error(err);
