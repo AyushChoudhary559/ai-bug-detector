@@ -782,6 +782,11 @@
             },
             highlightLine(lineNum) {
                 if (!this.editor) return;
+                const model = this.editor.getModel();
+                if (!model || lineNum > model.getLineCount()) {
+                    this.showAlert("Info", `Line ${lineNum} does not exist in the current editor.`, "info", "brand");
+                    return;
+                }
                 this.editor.revealLineInCenter(lineNum);
                 this.editor.setPosition({lineNumber: lineNum, column: 1});
                 this.editor.focus();
@@ -861,8 +866,10 @@
                             if (!response.ok) throw new Error("HTTP " + response.status);
                             data = await response.json();
                         } catch (apiErr) { 
-                            console.warn("Real API failed, falling back to mock or showing error.", apiErr);
-                            throw apiErr; 
+                            console.warn("Real API failed, falling back to mock.", apiErr);
+                            // Auto fallback for seamless demo experience
+                            data = this.generateMockData(lang, code);
+                            forceMock = true; // Mark as demo
                         } 
                     }
                     this.currentAuditData = data;
@@ -1002,7 +1009,10 @@
                         
                         let problemCode = "...";
                         if(this.editor && issue.lineNumber) {
-                            problemCode = this.editor.getModel().getLineContent(issue.lineNumber).trim();
+                            const model = this.editor.getModel();
+                            if (model && issue.lineNumber <= model.getLineCount()) {
+                                problemCode = model.getLineContent(issue.lineNumber).trim();
+                            }
                         }
 
                         const fixSafeCode = issue.fixCode ? issue.fixCode.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : '';
