@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevSentry: AI Code Bug & Vulnerability Detector</title>
+    <title>DevSentry AI - AI Code Intelligence</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -16,10 +16,15 @@
                         mono: ['"Fira Code"', '"JetBrains Mono"', 'monospace'],
                     },
                     colors: {
-                        slate: {
-                            850: '#151e2e',
-                            900: '#0f172a',
-                            950: '#020617',
+                        navy: {
+                            800: '#111827',
+                            900: '#0b0f19',
+                            950: '#06080d',
+                        },
+                        brand: {
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
                         }
                     }
                 }
@@ -28,384 +33,867 @@
     </script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <!-- Lucide Icons (instead of FontAwesome for a cleaner, more modern aesthetic) -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Monaco Editor Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
     <!-- Custom Styles -->
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #e2e8f0; }
         .code-font { font-family: 'Fira Code', monospace; }
-        
-        /* Scrollbar styling */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
         
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #6366f1; /* Indigo 500 */
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .nav-link.active { background-color: rgba(99, 102, 241, 0.1); color: #818cf8; border-right: 3px solid #6366f1; }
+        .tab-btn.active { border-bottom: 2px solid #818cf8; color: #818cf8; }
+        
+        .view-section { display: none; }
+        .view-section.active { display: flex; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .glass-panel { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glow-text { text-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
+        
+        /* Checkmark Animation */
+        .check-anim { stroke-dasharray: 50; stroke-dashoffset: 50; animation: draw 0.5s ease forwards; }
+        @keyframes draw { to { stroke-dashoffset: 0; } }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-300 h-screen flex flex-col overflow-hidden selection:bg-indigo-500/30">
+<body class="h-screen flex overflow-hidden selection:bg-brand-500/30">
 
-    <!-- Header Navbar -->
-    <header class="bg-slate-900 border-b border-slate-800 h-16 flex items-center justify-between px-6 shrink-0 z-10 relative">
-        <div class="flex items-center gap-3">
-            <div class="bg-indigo-500/10 p-2 rounded-lg text-indigo-400">
-                <i data-lucide="shield-alert" class="w-6 h-6"></i>
+    <!-- Sidebar Navigation -->
+    <aside class="w-20 lg:w-64 flex-shrink-0 border-r border-slate-800/60 bg-navy-950 flex flex-col transition-all z-20 hidden md:flex">
+        <div class="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-slate-800/60 shrink-0">
+            <div class="bg-brand-500/10 p-2 rounded-lg text-brand-400 shrink-0">
+                <i data-lucide="shield-check" class="w-6 h-6"></i>
             </div>
-            <h1 class="text-xl font-semibold text-white tracking-tight">DevSentry <span class="text-indigo-400 font-bold">AI</span></h1>
-        </div>
-        <div class="flex items-center gap-4">
-            <div class="relative">
-                <i data-lucide="code" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                <select id="language-select" class="bg-slate-800 border border-slate-700 text-sm text-slate-200 rounded-md pl-9 pr-8 py-2 appearance-none outline-none focus:border-indigo-500 hover:bg-slate-700 transition-colors cursor-pointer">
-                    <option value="java">Java</option>
-                    <option value="cpp">C++</option>
-                    <option value="python">Python</option>
-                    <option value="javascript">JavaScript</option>
-                </select>
-                <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            <div class="ml-3 hidden lg:block">
+                <h1 class="text-lg font-bold text-white tracking-tight">DevSentry <span class="text-brand-400">AI</span></h1>
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest">Code Intelligence</p>
             </div>
-            <button id="run-audit-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-md text-sm font-medium transition-all shadow-lg shadow-indigo-500/20 flex items-center gap-2 group focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 outline-none">
-                <i data-lucide="play" class="w-4 h-4 fill-current group-hover:translate-x-0.5 transition-transform"></i>
-                Run AI Audit
-            </button>
         </div>
-    </header>
-
-    <!-- Main Content Grid -->
-    <main class="flex-1 grid grid-cols-1 md:grid-cols-2 min-h-0">
         
-        <!-- Left Panel: Input (Monaco Editor) -->
-        <section class="flex flex-col border-r border-slate-800 min-h-0 bg-slate-900/50">
-            <div class="h-10 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-900 shrink-0">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <i data-lucide="file-code" class="w-4 h-4"></i> Source Code
-                </span>
+        <nav class="flex-1 py-6 flex flex-col gap-2">
+            <button onclick="app.navigate('landing')" class="nav-link w-full flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-slate-800/30 transition-colors" data-target="landing">
+                <i data-lucide="home" class="w-5 h-5 shrink-0"></i>
+                <span class="ml-3 font-medium hidden lg:block text-sm">Home</span>
+            </button>
+            <button onclick="app.navigate('dashboard')" class="nav-link w-full flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-slate-800/30 transition-colors" data-target="dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+                <span class="ml-3 font-medium hidden lg:block text-sm">Dashboard</span>
+            </button>
+            <button onclick="app.navigate('audit')" class="nav-link active w-full flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-slate-800/30 transition-colors" data-target="audit">
+                <i data-lucide="scan-line" class="w-5 h-5 shrink-0"></i>
+                <span class="ml-3 font-medium hidden lg:block text-sm">Code Audit</span>
+            </button>
+            <button onclick="app.navigate('history')" class="nav-link w-full flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-slate-800/30 transition-colors" data-target="history">
+                <i data-lucide="history" class="w-5 h-5 shrink-0"></i>
+                <span class="ml-3 font-medium hidden lg:block text-sm">History</span>
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-800/60 hidden lg:block">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
+                    <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-sm font-medium text-white truncate">Developer</p>
+                    <p class="text-xs text-slate-500 truncate">Pro Workspace</p>
+                </div>
+                <i data-lucide="settings" class="w-4 h-4 text-slate-500 ml-auto cursor-pointer hover:text-white"></i>
             </div>
-            <div id="editor-container" class="flex-1 min-h-0 w-full relative bg-[#1e1e1e]">
-                <!-- Monaco Editor mounts here -->
-                <div id="editor-loading" class="absolute inset-0 flex items-center justify-center text-slate-500 text-sm">
-                    Loading editor engine...
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="flex-1 flex flex-col min-w-0 bg-navy-900 relative">
+        
+        <!-- Topbar (Mobile Hamburger & Global Actions) -->
+        <header class="h-16 border-b border-slate-800/60 bg-navy-950/80 backdrop-blur-md flex items-center justify-between px-4 shrink-0 z-10">
+            <div class="flex items-center gap-3">
+                <button class="md:hidden p-2 text-slate-400 hover:text-white">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <!-- Breadcrumbs -->
+                <div class="hidden sm:flex items-center text-sm font-medium text-slate-400">
+                    <span>Workspace</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 mx-1 opacity-50"></i>
+                    <span id="breadcrumb-current" class="text-brand-400">Code Audit</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative hidden sm:block">
+                    <i data-lucide="code" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <select id="global-lang-select" class="bg-navy-800 border border-slate-700 text-sm text-slate-200 rounded-md pl-9 pr-8 py-1.5 appearance-none outline-none focus:border-brand-500 hover:bg-slate-800 transition-colors cursor-pointer">
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                        <option value="python">Python</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                </div>
+                <button class="text-slate-400 hover:text-brand-400 transition-colors" title="Toggle Theme (Demo)">
+                    <i data-lucide="moon" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ==============================
+             VIEW: LANDING PAGE 
+             ============================== -->
+        <section id="view-landing" class="view-section flex-1 overflow-y-auto p-8 lg:p-16 flex flex-col items-center justify-center text-center">
+            <div class="max-w-3xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-medium mb-8">
+                    <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                    v2.0 Advanced AI Engine Live
+                </div>
+                <h1 class="text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight">Find Bugs Before They Become <span class="text-brand-400 glow-text">Problems.</span></h1>
+                <p class="text-lg text-slate-400 mb-10 leading-relaxed max-w-2xl mx-auto">AI-powered debugging, deep security analysis, and complexity optimization for modern CSE projects and production systems.</p>
+                
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button onclick="app.navigate('audit')" class="px-8 py-3 bg-brand-600 hover:bg-brand-500 text-white rounded-lg font-semibold shadow-lg shadow-brand-500/25 transition-all flex items-center gap-2">
+                        <i data-lucide="terminal" class="w-5 h-5"></i> Start Code Audit
+                    </button>
+                    <button onclick="app.navigate('dashboard')" class="px-8 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-lg font-medium transition-all">
+                        Explore Dashboard
+                    </button>
+                </div>
+                
+                <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                    <div class="glass-panel p-6 rounded-xl">
+                        <i data-lucide="bug" class="w-6 h-6 text-rose-400 mb-4"></i>
+                        <h3 class="font-semibold text-white mb-2">Deep Bug Detection</h3>
+                        <p class="text-sm text-slate-400">Uncover hidden logic errors, null pointers, and state issues instantly.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <i data-lucide="shield-alert" class="w-6 h-6 text-amber-400 mb-4"></i>
+                        <h3 class="font-semibold text-white mb-2">Security Scanner</h3>
+                        <p class="text-sm text-slate-400">Detect SQL injections, weak auth, and memory leaks before deployment.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <i data-lucide="cpu" class="w-6 h-6 text-emerald-400 mb-4"></i>
+                        <h3 class="font-semibold text-white mb-2">Complexity & Big-O</h3>
+                        <p class="text-sm text-slate-400">Automated Time & Space complexity analysis for optimal performance.</p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Right Panel: Output (Results) -->
-        <section class="flex flex-col min-h-0 bg-slate-950 relative">
-            <div class="h-10 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-900 shrink-0">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <i data-lucide="activity" class="w-4 h-4"></i> Audit Results
-                </span>
+        <!-- ==============================
+             VIEW: DASHBOARD
+             ============================== -->
+        <section id="view-dashboard" class="view-section flex-1 overflow-y-auto p-6 lg:p-10 flex-col">
+            <div class="max-w-6xl mx-auto w-full">
+                <h2 class="text-2xl font-bold text-white mb-2">Welcome back, Developer</h2>
+                <p class="text-slate-400 mb-8">Here is a summary of your recent code audits and AI analysis.</p>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-brand-500">
+                        <p class="text-sm font-medium text-slate-400 mb-1">Total Audits</p>
+                        <p class="text-3xl font-bold text-white">124</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-rose-500">
+                        <p class="text-sm font-medium text-slate-400 mb-1">Bugs Detected</p>
+                        <p class="text-3xl font-bold text-white">47</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-500">
+                        <p class="text-sm font-medium text-slate-400 mb-1">Avg Quality Score</p>
+                        <p class="text-3xl font-bold text-white">82<span class="text-lg text-slate-500 font-normal">/100</span></p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-500">
+                        <p class="text-sm font-medium text-slate-400 mb-1">Security Warnings</p>
+                        <p class="text-3xl font-bold text-white">12</p>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Table -->
+                <div class="glass-panel rounded-xl overflow-hidden border border-slate-800">
+                    <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                        <h3 class="font-semibold text-white">Recent Audits</h3>
+                        <button onclick="app.navigate('history')" class="text-sm text-brand-400 hover:text-brand-300 font-medium">View All</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-400 uppercase bg-slate-900/80">
+                                <tr>
+                                    <th class="px-6 py-3 font-semibold">Project / File</th>
+                                    <th class="px-6 py-3 font-semibold">Language</th>
+                                    <th class="px-6 py-3 font-semibold">Score</th>
+                                    <th class="px-6 py-3 font-semibold">Issues</th>
+                                    <th class="px-6 py-3 font-semibold">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/60">
+                                <tr class="hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-slate-200">UserAuthService.java</td>
+                                    <td class="px-6 py-4"><span class="px-2 py-1 bg-slate-800 rounded text-xs">Java</span></td>
+                                    <td class="px-6 py-4"><span class="text-rose-400 font-bold">45</span></td>
+                                    <td class="px-6 py-4">3 Bugs, 1 Security</td>
+                                    <td class="px-6 py-4 text-slate-400">2 mins ago</td>
+                                </tr>
+                                <tr class="hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-slate-200">DataProcessor.cpp</td>
+                                    <td class="px-6 py-4"><span class="px-2 py-1 bg-slate-800 rounded text-xs">C++</span></td>
+                                    <td class="px-6 py-4"><span class="text-amber-400 font-bold">72</span></td>
+                                    <td class="px-6 py-4">1 Memory Leak</td>
+                                    <td class="px-6 py-4 text-slate-400">Yesterday</td>
+                                </tr>
+                                <tr class="hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-slate-200">api_routes.py</td>
+                                    <td class="px-6 py-4"><span class="px-2 py-1 bg-slate-800 rounded text-xs">Python</span></td>
+                                    <td class="px-6 py-4"><span class="text-emerald-400 font-bold">95</span></td>
+                                    <td class="px-6 py-4 text-slate-500">Clean</td>
+                                    <td class="px-6 py-4 text-slate-400">Oct 12, 2026</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            
-            <div id="results-container" class="flex-1 overflow-y-auto p-6 scroll-smooth">
+        </section>
+
+        <!-- ==============================
+             VIEW: HISTORY
+             ============================== -->
+        <section id="view-history" class="view-section flex-1 overflow-y-auto p-6 lg:p-10 flex-col">
+            <div class="max-w-6xl mx-auto w-full">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-1">Scan History</h2>
+                        <p class="text-slate-400 text-sm">Review past audits, export reports, and track code quality over time.</p>
+                    </div>
+                    <button class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-md border border-slate-700 flex items-center gap-2 transition-colors">
+                        <i data-lucide="download" class="w-4 h-4"></i> Export CSV
+                    </button>
+                </div>
                 
-                <!-- State 1: Idle -->
-                <div id="state-idle" class="h-full flex flex-col items-center justify-center text-center text-slate-500 space-y-4">
-                    <div class="bg-slate-800/50 p-5 rounded-full border border-slate-800">
-                        <i data-lucide="scan" class="w-10 h-10 text-slate-400"></i>
-                    </div>
-                    <div>
-                        <p class="text-slate-300 font-medium text-lg">Ready for Inspection</p>
-                        <p class="text-sm mt-1 text-slate-500">Paste your source code and click <span class="text-indigo-400">Run AI Audit</span> to begin analysis.</p>
-                    </div>
+                <div class="glass-panel p-24 rounded-xl border border-slate-800 flex flex-col items-center justify-center text-center">
+                    <i data-lucide="database" class="w-12 h-12 text-slate-600 mb-4"></i>
+                    <p class="text-slate-300 font-medium">Database Not Connected</p>
+                    <p class="text-sm text-slate-500 max-w-sm mt-2">History requires a persistent database (like MySQL or PostgreSQL) connected to your Spring Boot backend.</p>
                 </div>
+            </div>
+        </section>
 
-                <!-- State 2: Loading -->
-                <div id="state-loading" class="hidden h-full flex flex-col items-center justify-center text-center space-y-5">
-                    <div class="spinner"></div>
-                    <div class="text-indigo-400 font-medium animate-pulse">Analyzing abstract syntax trees...</div>
-                </div>
-
-                <!-- State Error -->
-                <div id="state-error" class="hidden h-full flex flex-col items-center justify-center text-center space-y-4">
-                    <div class="bg-rose-500/10 p-4 rounded-full border border-rose-500/20">
-                        <i data-lucide="server-crash" class="w-8 h-8 text-rose-500"></i>
+        <!-- ==============================
+             VIEW: CODE AUDIT (MAIN SPLIT)
+             ============================== -->
+        <section id="view-audit" class="view-section active flex-1 flex flex-col md:flex-row min-h-0">
+            
+            <!-- LEFT PANEL: EDITOR -->
+            <div class="flex-1 flex flex-col border-r border-slate-800/60 min-h-0 min-w-0 bg-navy-900/50 relative">
+                <!-- Editor Toolbar -->
+                <div class="h-12 border-b border-slate-800/60 flex items-center justify-between px-4 bg-navy-950 shrink-0">
+                    <div class="flex items-center gap-4">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                            <i data-lucide="file-code" class="w-4 h-4 text-brand-400"></i> Source Code
+                        </span>
+                        <div class="hidden md:flex items-center gap-1 border-l border-slate-800 pl-4">
+                            <button onclick="app.clearEditor()" class="p-1.5 text-slate-500 hover:text-white hover:bg-slate-800 rounded transition" title="Clear Code"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            <button onclick="app.formatCode()" class="p-1.5 text-slate-500 hover:text-white hover:bg-slate-800 rounded transition" title="Format Code"><i data-lucide="align-left" class="w-4 h-4"></i></button>
+                            <button class="p-1.5 text-slate-500 hover:text-white hover:bg-slate-800 rounded transition" title="Upload File"><i data-lucide="upload" class="w-4 h-4"></i></button>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-rose-400 font-medium text-lg">Connection Error</p>
-                        <p id="error-message" class="text-sm mt-2 text-slate-400 max-w-sm mx-auto">Could not connect to the backend server. Make sure your Spring Boot application is running on port 8080.</p>
-                    </div>
-                    <button id="retry-btn" class="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm rounded-md transition-colors border border-slate-700">
-                        Try Again
+                    <button id="btn-run-audit" class="bg-brand-600 hover:bg-brand-500 text-white px-4 py-1.5 rounded-md text-sm font-medium transition-all shadow-lg shadow-brand-500/20 flex items-center gap-2">
+                        <i data-lucide="zap" class="w-4 h-4 fill-current"></i> Run AI Audit
                     </button>
                 </div>
 
-                <!-- State 3: Results -->
-                <div id="state-results" class="hidden space-y-6">
+                <!-- Monaco Container -->
+                <div id="editor-container" class="flex-1 min-h-0 w-full relative">
+                    <div id="editor-loading" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-sm bg-navy-900 z-10">
+                        <div class="spinner mb-4"></div>
+                        Initializing Editor...
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: RESULTS -->
+            <div class="w-full md:w-[45%] lg:w-[50%] flex flex-col min-h-0 bg-navy-950/80 relative">
+                
+                <!-- Results Header -->
+                <div class="h-12 border-b border-slate-800/60 flex items-center justify-between px-4 bg-navy-950 shrink-0">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> Audit Results
+                    </span>
+                    <button id="btn-gen-report" class="hidden text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+                        <i data-lucide="file-text" class="w-3 h-3"></i> Generate Report
+                    </button>
+                </div>
+
+                <!-- Results Scrollable Area -->
+                <div class="flex-1 overflow-y-auto scroll-smooth relative" id="results-scroll-area">
                     
-                    <!-- Top Metrics Row -->
-                    <div class="flex items-center gap-4">
-                        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex-1 flex flex-col justify-center items-center relative overflow-hidden">
-                            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none"></div>
-                            <span class="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-1">Quality Score</span>
-                            <div class="flex items-baseline gap-1 relative z-10">
-                                <span id="res-score" class="text-4xl font-bold">--</span>
-                                <span class="text-slate-500 font-medium">/100</span>
+                    <!-- EMPTY STATE -->
+                    <div id="state-empty" class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-navy-950">
+                        <div class="bg-slate-800/40 p-6 rounded-full border border-slate-800 mb-6">
+                            <i data-lucide="bot" class="w-12 h-12 text-brand-400 opacity-80"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Ready to inspect your code</h3>
+                        <p class="text-sm text-slate-400 max-w-sm mb-8 leading-relaxed">Paste Java, C++, or Python code and let DevSentry AI analyze bugs, security risks, performance, and complexity.</p>
+                        
+                        <div class="flex flex-wrap justify-center gap-3">
+                            <button onclick="app.loadTemplate('java')" class="px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-medium hover:border-brand-500 hover:text-brand-400 transition-colors">Load Java Demo</button>
+                            <button onclick="app.loadTemplate('cpp')" class="px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-medium hover:border-brand-500 hover:text-brand-400 transition-colors">Load C++ Demo</button>
+                        </div>
+                    </div>
+
+                    <!-- LOADING STATE -->
+                    <div id="state-loading" class="hidden absolute inset-0 flex flex-col items-center justify-center p-8 bg-navy-950 z-10">
+                        <div class="relative w-20 h-20 mb-8">
+                            <div class="absolute inset-0 rounded-full border-t-2 border-brand-500 animate-spin"></div>
+                            <div class="absolute inset-2 rounded-full border-r-2 border-emerald-500 animate-spin" style="animation-duration: 1.5s;"></div>
+                            <div class="absolute inset-0 flex items-center justify-center"><i data-lucide="cpu" class="w-6 h-6 text-brand-400 animate-pulse"></i></div>
+                        </div>
+                        <h3 class="text-lg font-medium text-white mb-6">DevSentry AI is inspecting...</h3>
+                        
+                        <div class="w-64 space-y-3 text-sm" id="loading-steps">
+                            <div class="flex items-center gap-3 text-slate-400" id="step-1"><i data-lucide="circle-dashed" class="w-4 h-4 animate-spin"></i> Parsing abstract syntax...</div>
+                            <div class="flex items-center gap-3 text-slate-600" id="step-2"><i data-lucide="circle" class="w-4 h-4"></i> Hunting for logic bugs...</div>
+                            <div class="flex items-center gap-3 text-slate-600" id="step-3"><i data-lucide="circle" class="w-4 h-4"></i> Checking security flaws...</div>
+                            <div class="flex items-center gap-3 text-slate-600" id="step-4"><i data-lucide="circle" class="w-4 h-4"></i> Analyzing Big-O complexity...</div>
+                        </div>
+                    </div>
+
+                    <!-- ERROR STATE -->
+                    <div id="state-error" class="hidden absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-navy-950 z-10">
+                        <div class="bg-rose-500/10 p-4 rounded-full border border-rose-500/20 mb-4">
+                            <i data-lucide="server-crash" class="w-8 h-8 text-rose-500"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-rose-400 mb-2">Analysis Failed</h3>
+                        <p id="error-message" class="text-sm text-slate-400 max-w-sm mb-6">Backend connection refused.</p>
+                        <div class="flex gap-3">
+                            <button onclick="app.showEmpty()" class="px-4 py-2 bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700 hover:bg-slate-700 transition">Cancel</button>
+                            <button onclick="app.runAudit(true)" class="px-4 py-2 bg-brand-600 text-white text-sm rounded-md shadow-lg shadow-brand-500/20 hover:bg-brand-500 transition flex items-center gap-2">
+                                <i data-lucide="bot" class="w-4 h-4"></i> Fallback to Mock AI
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-4 max-w-xs">Use "Fallback to Mock AI" to view rich demo data if your Spring Boot server is not running.</p>
+                    </div>
+
+                    <!-- RESULTS STATE -->
+                    <div id="state-results" class="hidden flex-col h-full">
+                        
+                        <!-- Top Score Card -->
+                        <div class="p-6 bg-gradient-to-b from-slate-900 to-navy-950 border-b border-slate-800/60 shrink-0">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                        Quality Score <span id="res-badge" class="px-2 py-0.5 text-xs rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Excellent</span>
+                                    </h2>
+                                    <p class="text-sm text-slate-400 mt-1">Based on bugs, security, and complexity.</p>
+                                </div>
+                                <div class="flex items-baseline gap-1">
+                                    <span id="res-score" class="text-5xl font-bold text-emerald-400 tracking-tighter">92</span>
+                                    <span class="text-slate-500 font-medium">/100</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-4 gap-2 mt-6">
+                                <div class="bg-navy-800/80 p-3 rounded-lg border border-slate-800 text-center">
+                                    <div class="text-2xl font-bold text-white" id="res-stat-bugs">0</div>
+                                    <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Bugs</div>
+                                </div>
+                                <div class="bg-navy-800/80 p-3 rounded-lg border border-slate-800 text-center">
+                                    <div class="text-2xl font-bold text-white" id="res-stat-sec">0</div>
+                                    <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Security</div>
+                                </div>
+                                <div class="bg-navy-800/80 p-3 rounded-lg border border-slate-800 text-center">
+                                    <div class="text-2xl font-bold text-white" id="res-stat-perf">0</div>
+                                    <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Perf</div>
+                                </div>
+                                <div class="bg-navy-800/80 p-3 rounded-lg border border-slate-800 text-center">
+                                    <div class="text-2xl font-bold text-white" id="res-stat-smells">0</div>
+                                    <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Smells</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex-1 flex flex-col justify-center items-center relative overflow-hidden">
-                            <div class="absolute inset-0 bg-gradient-to-bl from-rose-500/5 to-transparent pointer-events-none"></div>
-                            <span class="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-1">Issues Found</span>
-                            <div class="flex items-baseline gap-1 relative z-10">
-                                <span id="res-bugs" class="text-4xl font-bold text-slate-200">--</span>
+
+                        <!-- Sticky Tabs -->
+                        <div class="sticky top-0 z-10 bg-navy-950/90 backdrop-blur-md border-b border-slate-800/60 px-2 flex overflow-x-auto hide-scrollbar">
+                            <button class="tab-btn active px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-overview">Overview</button>
+                            <button class="tab-btn px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-issues">Issues & Fixes</button>
+                            <button class="tab-btn px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-complexity">Complexity</button>
+                            <button class="tab-btn px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-tests">Test Cases</button>
+                        </div>
+
+                        <!-- Tab Content Wrapper -->
+                        <div class="p-6">
+                            
+                            <!-- TAB: OVERVIEW -->
+                            <div id="tab-overview" class="tab-content active space-y-6">
+                                <div class="glass-panel p-5 rounded-xl">
+                                    <h3 class="text-sm font-semibold text-white mb-2 flex items-center gap-2"><i data-lucide="book-open" class="w-4 h-4 text-brand-400"></i> AI Executive Summary</h3>
+                                    <p id="res-summary" class="text-sm text-slate-300 leading-relaxed"></p>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-400"></i> Quality Metrics</h3>
+                                    <div class="space-y-4 glass-panel p-5 rounded-xl">
+                                        <!-- Inject quality bars via JS -->
+                                        <div id="quality-bars"></div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Executive Summary -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
-                        <h3 class="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                            <i data-lucide="clipboard-list" class="w-4 h-4 text-indigo-400"></i> Executive Summary
-                        </h3>
-                        <p id="res-summary" class="text-sm text-slate-300 leading-relaxed"></p>
-                    </div>
-
-                    <!-- Issues List -->
-                    <div>
-                        <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 px-1">
-                            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i> Identified Vulnerabilities
-                        </h3>
-                        <div id="res-issues-list" class="space-y-4">
-                            <!-- Issue Cards injected by JS -->
-                        </div>
-                    </div>
-
-                    <!-- Corrected Code -->
-                    <div>
-                        <h3 class="text-sm font-semibold text-white mb-3 mt-8 flex items-center gap-2 px-1">
-                            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Suggested Remediation
-                        </h3>
-                        <div class="bg-[#1e1e1e] rounded-xl overflow-hidden border border-slate-800 shadow-lg">
-                            <div class="bg-[#252526] px-4 py-2 flex items-center border-b border-black/30">
-                                <span class="text-xs text-slate-400 font-mono">Refactored Source</span>
+                            <!-- TAB: ISSUES -->
+                            <div id="tab-issues" class="tab-content space-y-4">
+                                <div id="issues-list" class="space-y-4">
+                                    <!-- Cards injected by JS -->
+                                </div>
                             </div>
-                            <pre class="p-4 overflow-x-auto text-sm code-font text-slate-300 leading-relaxed"><code id="res-corrected-code"></code></pre>
+
+                            <!-- TAB: COMPLEXITY -->
+                            <div id="tab-complexity" class="tab-content space-y-6">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="glass-panel p-5 rounded-xl border-t-2 border-t-emerald-500">
+                                        <div class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Time Complexity</div>
+                                        <div class="text-3xl font-mono text-white mb-3" id="comp-time">O(n)</div>
+                                        <p class="text-sm text-slate-300" id="comp-time-desc">Linear time.</p>
+                                    </div>
+                                    <div class="glass-panel p-5 rounded-xl border-t-2 border-t-brand-500">
+                                        <div class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Space Complexity</div>
+                                        <div class="text-3xl font-mono text-white mb-3" id="comp-space">O(1)</div>
+                                        <p class="text-sm text-slate-300" id="comp-space-desc">Constant space.</p>
+                                    </div>
+                                </div>
+                                <div class="glass-panel p-5 rounded-xl">
+                                    <h3 class="text-sm font-semibold text-white mb-2 flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-amber-400"></i> Performance Recommendations</h3>
+                                    <ul id="perf-list" class="list-disc list-inside text-sm text-slate-300 space-y-2 mt-3"></ul>
+                                </div>
+                            </div>
+
+                            <!-- TAB: TEST CASES -->
+                            <div id="tab-tests" class="tab-content space-y-4">
+                                <p class="text-sm text-slate-400 mb-4">AI-generated edge cases and unit test scenarios based on your logic.</p>
+                                <div id="tests-list" class="space-y-4">
+                                    <!-- Test cards injected by JS -->
+                                </div>
+                            </div>
+
                         </div>
                     </div>
-
                 </div>
             </div>
         </section>
-    </main>
 
-    <!-- Monaco Editor Loader -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    </div>
+
+    <!-- Application Logic (Vanilla JS SPA) -->
     <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
-
-        // ----------------------------------------------------
-        // 1. Monaco Editor Setup
-        // ----------------------------------------------------
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
-        
-        let editor;
-        
-        require(['vs/editor/editor.main'], function () {
-            document.getElementById('editor-loading').style.display = 'none';
+        // ==========================================
+        // 1. APPLICATION STATE & ROUTING
+        // ==========================================
+        const app = {
+            editor: null,
+            currentView: 'landing',
             
-            // Initial placeholder code snippet
-            const initialCode = `public class UserAuth {
-    public boolean login(String user, String pass) {
-        // Vulnerable to SQL Injection
-        String query = "SELECT * FROM users WHERE uname='" + user + "' AND pword='" + pass + "'";
-        
-        // Resource not closed
-        Connection conn = dataSource.getConnection();
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery(query);
-        
-        return rs.next();
-    }
-}`;
+            init() {
+                lucide.createIcons();
+                this.setupRouting();
+                this.setupTabs();
+                this.setupEditor();
+                this.bindEvents();
+                
+                // Show initial view
+                this.navigate('landing');
+            },
 
-            editor = monaco.editor.create(document.getElementById('editor-container'), {
-                value: initialCode,
-                language: 'java',
-                theme: 'vs-dark',
-                automaticLayout: true,
-                fontFamily: '"Fira Code", "JetBrains Mono", monospace',
-                fontSize: 14,
-                lineHeight: 24,
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                padding: { top: 16, bottom: 16 },
-                roundedSelection: false,
-                scrollbar: {
-                    useShadows: false,
-                    verticalHasArrows: false,
-                    horizontalHasArrows: false,
-                    vertical: 'visible',
-                    horizontal: 'visible',
-                    verticalScrollbarSize: 10,
-                    horizontalScrollbarSize: 10,
+            navigate(viewId) {
+                // Hide all views
+                document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+                
+                // Show target view
+                const view = document.getElementById(`view-${viewId}`);
+                if (view) view.classList.add('active');
+                
+                // Highlight nav
+                const navLink = document.querySelector(`.nav-link[data-target="${viewId}"]`);
+                if (navLink) navLink.classList.add('active');
+
+                // Update breadcrumb
+                document.getElementById('breadcrumb-current').textContent = viewId.charAt(0).toUpperCase() + viewId.slice(1);
+
+                this.currentView = viewId;
+
+                // Refresh editor layout if audit view is active
+                if (viewId === 'audit' && this.editor) {
+                    setTimeout(() => this.editor.layout(), 100);
                 }
-            });
+            },
 
-            // Update language dynamically based on dropdown
-            document.getElementById('language-select').addEventListener('change', (e) => {
-                monaco.editor.setModelLanguage(editor.getModel(), e.target.value);
-            });
-        });
+            setupRouting() {
+                // Handled inline via onclick="app.navigate(...)"
+            },
 
-        // ----------------------------------------------------
-        // 2. UI Logic & API Simulation
-        // ----------------------------------------------------
-        const btnRun = document.getElementById('run-audit-btn');
-        const stateIdle = document.getElementById('state-idle');
-        const stateLoading = document.getElementById('state-loading');
-        const stateResults = document.getElementById('state-results');
+            setupTabs() {
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Remove active from all tabs
+                        const tabsParent = e.target.closest('.sticky');
+                        tabsParent.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+                        
+                        // Add active to clicked
+                        e.target.classList.add('active');
+                        
+                        // Hide all contents
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        
+                        // Show target content
+                        const targetId = e.target.getAttribute('data-target');
+                        document.getElementById(targetId).classList.add('active');
+                    });
+                });
+            },
 
-        const stateError = document.getElementById('state-error');
-        const errorMessage = document.getElementById('error-message');
+            bindEvents() {
+                document.getElementById('btn-run-audit').addEventListener('click', () => this.runAudit());
+                document.getElementById('global-lang-select').addEventListener('change', (e) => {
+                    if (this.editor) monaco.editor.setModelLanguage(this.editor.getModel(), e.target.value);
+                });
+            },
 
-        document.getElementById('retry-btn').addEventListener('click', () => {
-            stateError.classList.add('hidden');
-            stateIdle.classList.remove('hidden');
-        });
+            // ==========================================
+            // 2. MONACO EDITOR INTEGRATION
+            // ==========================================
+            setupEditor() {
+                require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+                require(['vs/editor/editor.main'], () => {
+                    document.getElementById('editor-loading').style.display = 'none';
+                    
+                    this.editor = monaco.editor.create(document.getElementById('editor-container'), {
+                        value: "",
+                        language: 'java',
+                        theme: 'vs-dark',
+                        automaticLayout: true,
+                        fontFamily: '"Fira Code", "JetBrains Mono", monospace',
+                        fontSize: 14,
+                        lineHeight: 24,
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        padding: { top: 16, bottom: 16 },
+                        roundedSelection: false,
+                        scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+                    });
+                });
+            },
 
-        // Color mapping for severities
-        const severityColors = {
-            'CRITICAL': 'border-l-rose-500 bg-rose-500/5',
-            'HIGH': 'border-l-orange-500 bg-orange-500/5',
-            'MEDIUM': 'border-l-amber-500 bg-amber-500/5',
-            'LOW': 'border-l-blue-500 bg-blue-500/5'
-        };
+            clearEditor() {
+                if (this.editor) this.editor.setValue("");
+                this.showEmpty();
+            },
 
-        const severityBadges = {
-            'CRITICAL': 'bg-rose-500/20 text-rose-400 border border-rose-500/30',
-            'HIGH': 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
-            'MEDIUM': 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
-            'LOW': 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-        };
+            formatCode() {
+                if (this.editor) this.editor.getAction('editor.action.formatDocument').run();
+            },
 
-        btnRun.addEventListener('click', async () => {
-            if (!editor) return;
+            loadTemplate(lang) {
+                document.getElementById('global-lang-select').value = lang;
+                if (this.editor) {
+                    monaco.editor.setModelLanguage(this.editor.getModel(), lang);
+                    if (lang === 'java') {
+                        this.editor.setValue(`public class UserAuth {\n    public boolean login(String user, String pass) {\n        // Vulnerable to SQL Injection\n        String query = "SELECT * FROM users WHERE uname='" + user + "' AND pword='" + pass + "'";\n        \n        // Resource Leak\n        Connection conn = dataSource.getConnection();\n        Statement stmt = conn.createStatement();\n        ResultSet rs = stmt.executeQuery(query);\n        \n        return rs.next();\n    }\n}`);
+                    } else if (lang === 'cpp') {
+                        this.editor.setValue(`#include <iostream>\n\nvoid processData() {\n    int* data = new int[100];\n    // Processing...\n    // Memory leak here (no delete[])\n}\n\nint main() {\n    processData();\n    return 0;\n}`);
+                    }
+                }
+            },
 
-            const code = editor.getValue();
-            
-            if (!code.trim()) {
-                // Change to non-blocking UI indicator later if needed, simple alert for empty input is okay
-                alert("Please enter some source code to analyze.");
-                return;
-            }
+            highlightLine(lineNum) {
+                if (!this.editor) return;
+                this.editor.revealLineInCenter(lineNum);
+                this.editor.setPosition({lineNumber: lineNum, column: 1});
+                this.editor.focus();
+            },
 
-            // UI Transition: Show Loading State
-            stateIdle.classList.add('hidden');
-            stateResults.classList.add('hidden');
-            stateError.classList.add('hidden');
-            stateLoading.classList.remove('hidden');
-            
-            // Disable button during analysis
-            btnRun.disabled = true;
-            btnRun.classList.add('opacity-70', 'cursor-not-allowed');
-            btnRun.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Auditing...`;
-            lucide.createIcons();
+            // ==========================================
+            // 3. AUDIT ENGINE & API SERVICE
+            // ==========================================
+            showEmpty() {
+                ['state-loading', 'state-error', 'state-results'].forEach(id => document.getElementById(id).classList.add('hidden'));
+                document.getElementById('state-empty').classList.remove('hidden');
+            },
 
-            try {
-                // Connect to the real Spring Boot backend
-                const language = document.getElementById('language-select').value;
-                const response = await fetch('http://localhost:8080/api/v1/detector/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ language: language, sourceCode: code })
+            async runAudit(forceMock = false) {
+                if (!this.editor) return;
+                const code = this.editor.getValue();
+                if (!code.trim()) {
+                    alert("Please enter some source code first.");
+                    return;
+                }
+
+                const lang = document.getElementById('global-lang-select').value;
+
+                // UI Loading sequence
+                document.getElementById('state-empty').classList.add('hidden');
+                document.getElementById('state-error').classList.add('hidden');
+                document.getElementById('state-results').classList.add('hidden');
+                document.getElementById('state-loading').classList.remove('hidden');
+                
+                const btnRun = document.getElementById('btn-run-audit');
+                btnRun.disabled = true;
+                btnRun.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Auditing...`;
+                lucide.createIcons();
+
+                // Animate steps
+                this.animateLoadingSteps();
+
+                try {
+                    let data;
+                    
+                    if (forceMock) {
+                        await new Promise(r => setTimeout(r, 2000));
+                        data = this.generateMockData(lang, code);
+                    } else {
+                        // Attempt real fetch
+                        try {
+                            const response = await fetch('http://localhost:8080/api/v1/detector/analyze', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ language: lang, sourceCode: code })
+                            });
+                            if (!response.ok) throw new Error("HTTP " + response.status);
+                            data = await response.json();
+                            if (!data.issues) throw new Error("Invalid response format");
+                        } catch (apiErr) {
+                            console.warn("Real API failed, switching to Mock AI...", apiErr);
+                            // Fallback gracefully without showing error if we want a seamless demo
+                            // Or, we explicitly throw to show error screen (chosen behavior)
+                            throw apiErr; 
+                        }
+                    }
+
+                    this.renderResults(data);
+
+                } catch (err) {
+                    console.error("Audit Failed:", err);
+                    document.getElementById('state-loading').classList.add('hidden');
+                    document.getElementById('state-error').classList.remove('hidden');
+                    document.getElementById('error-message').textContent = "Failed to connect to backend. Please ensure your Spring Boot app is running, or fallback to Mock AI.";
+                } finally {
+                    btnRun.disabled = false;
+                    btnRun.innerHTML = `<i data-lucide="zap" class="w-4 h-4 fill-current"></i> Run AI Audit`;
+                    lucide.createIcons();
+                }
+            },
+
+            animateLoadingSteps() {
+                const steps = [
+                    document.getElementById('step-1'),
+                    document.getElementById('step-2'),
+                    document.getElementById('step-3'),
+                    document.getElementById('step-4')
+                ];
+                
+                steps.forEach(s => {
+                    s.className = "flex items-center gap-3 text-slate-600";
+                    s.innerHTML = `<i data-lucide="circle" class="w-4 h-4"></i> ${s.textContent.trim()}`;
+                });
+                lucide.createIcons();
+
+                let current = 0;
+                const interval = setInterval(() => {
+                    if (current > 0) {
+                        steps[current-1].className = "flex items-center gap-3 text-emerald-400";
+                        steps[current-1].innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i> ${steps[current-1].textContent.trim()}`;
+                    }
+                    if (current < steps.length) {
+                        steps[current].className = "flex items-center gap-3 text-brand-400";
+                        steps[current].innerHTML = `<i data-lucide="circle-dashed" class="w-4 h-4 animate-spin"></i> ${steps[current].textContent.trim()}`;
+                        lucide.createIcons();
+                        current++;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 500);
+            },
+
+            // ==========================================
+            // 4. RENDER ENGINE
+            // ==========================================
+            renderResults(data) {
+                // Top level stats
+                document.getElementById('res-score').textContent = data.score || data.qualityScore || 0;
+                document.getElementById('res-stat-bugs').textContent = (data.issues || []).filter(i => i.issueType === 'LOGIC').length || data.totalBugsFound || 0;
+                document.getElementById('res-stat-sec').textContent = (data.issues || []).filter(i => i.issueType === 'SECURITY').length || 0;
+                document.getElementById('res-stat-perf').textContent = (data.issues || []).filter(i => i.issueType === 'PERFORMANCE').length || 0;
+                document.getElementById('res-stat-smells').textContent = (data.issues || []).filter(i => i.issueType === 'SYNTAX' || i.issueType === 'RESOURCE_LEAK').length || 0;
+                
+                document.getElementById('res-summary').textContent = data.summary;
+
+                // Colorize badge
+                const score = parseInt(data.score || data.qualityScore || 0, 10);
+                const badge = document.getElementById('res-badge');
+                if (score >= 80) { badge.className = "px-2 py-0.5 text-xs rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"; badge.textContent = "Excellent"; }
+                else if (score >= 60) { badge.className = "px-2 py-0.5 text-xs rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30"; badge.textContent = "Acceptable"; }
+                else { badge.className = "px-2 py-0.5 text-xs rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30"; badge.textContent = "Critical"; }
+
+                // Issues List
+                const issuesList = document.getElementById('issues-list');
+                issuesList.innerHTML = '';
+                
+                if (!data.issues || data.issues.length === 0) {
+                    issuesList.innerHTML = `<div class="p-6 text-center text-emerald-400 glass-panel rounded-xl"><i data-lucide="check-circle" class="w-8 h-8 mx-auto mb-2"></i>No issues found!</div>`;
+                } else {
+                    data.issues.forEach(issue => {
+                        const sevColor = issue.severity === 'CRITICAL' ? 'rose' : issue.severity === 'HIGH' ? 'orange' : issue.severity === 'MEDIUM' ? 'amber' : 'blue';
+                        const el = document.createElement('div');
+                        el.className = `glass-panel border-l-4 border-l-${sevColor}-500 rounded-r-xl p-5 shadow-sm`;
+                        el.innerHTML = `
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-${sevColor}-500/20 text-${sevColor}-400 border border-${sevColor}-500/30">${issue.severity}</span>
+                                    <span class="text-xs font-medium text-slate-400 bg-slate-800/50 px-2 py-0.5 rounded">${issue.issueType}</span>
+                                </div>
+                                <button onclick="app.highlightLine(${issue.lineNumber})" class="text-xs font-mono text-brand-400 hover:text-brand-300 bg-brand-500/10 px-2 py-1 rounded transition-colors flex items-center gap-1"><i data-lucide="target" class="w-3 h-3"></i> Line ${issue.lineNumber}</button>
+                            </div>
+                            <h4 class="text-base font-semibold text-white mb-2">${issue.title || issue.description.split('.')[0]}</h4>
+                            <p class="text-sm text-slate-300 mb-4 leading-relaxed">${issue.description}</p>
+                            
+                            <!-- AI Fix Component -->
+                            <div class="mt-4 border border-slate-800 rounded-lg overflow-hidden bg-navy-950">
+                                <div class="px-3 py-2 bg-slate-900 border-b border-slate-800 flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                                    <i data-lucide="wrench" class="w-3 h-3"></i> AI Recommended Fix
+                                </div>
+                                <div class="p-3 text-sm text-slate-300">
+                                    ${issue.recommendation}
+                                </div>
+                                ${issue.fixCode ? `
+                                <div class="p-0 border-t border-slate-800">
+                                    <pre class="p-3 text-xs code-font text-emerald-300 bg-[#0d1117] overflow-x-auto"><code>${issue.fixCode}</code></pre>
+                                </div>
+                                ` : ''}
+                            </div>
+                        `;
+                        issuesList.appendChild(el);
+                    });
+                }
+
+                // Complexity Tab
+                if (data.complexity) {
+                    document.getElementById('comp-time').textContent = data.complexity.time;
+                    document.getElementById('comp-time-desc').textContent = data.complexity.timeExplanation;
+                    document.getElementById('comp-space').textContent = data.complexity.space;
+                    document.getElementById('comp-space-desc').textContent = data.complexity.spaceExplanation;
+                }
+
+                // Perf List
+                const pList = document.getElementById('perf-list');
+                pList.innerHTML = '';
+                (data.performance || ["Code execution path is currently optimal.", "No major bottlenecks detected."]).forEach(p => {
+                    pList.innerHTML += `<li>${p}</li>`;
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Server returned HTTP ${response.status}. Please check backend logs.`);
-                }
-
-                const data = await response.json();
-                
-                // Extra safety: check if data format matches expected
-                if (!data.issues) {
-                    throw new Error('Invalid response format from server.');
-                }
-                
-                renderResults(data);
-
-            } catch (err) {
-                console.error("Audit Error:", err);
-                // Extract useful message if fetch failed completely (network error)
-                if (err.message.includes("Failed to fetch")) {
-                    errorMessage.textContent = "Could not connect to the backend. Ensure your Spring Boot app is running on port 8080 and CORS is enabled.";
-                } else {
-                    errorMessage.textContent = err.message;
-                }
-                stateLoading.classList.add('hidden');
-                stateError.classList.remove('hidden');
-            } finally {
-                // Restore button
-                btnRun.disabled = false;
-                btnRun.classList.remove('opacity-70', 'cursor-not-allowed');
-                btnRun.innerHTML = `<i data-lucide="play" class="w-4 h-4 fill-current group-hover:translate-x-0.5 transition-transform"></i> Run AI Audit`;
-                lucide.createIcons();
-            }
-        });
-
-        function renderResults(data) {
-            // Update Metrics
-            const scoreEl = document.getElementById('res-score');
-            scoreEl.textContent = data.qualityScore;
-            
-            // Dynamic color for score based on severity/quality
-            const score = parseInt(data.qualityScore, 10);
-            if (score >= 80) scoreEl.className = 'text-4xl font-bold text-emerald-400';
-            else if (score >= 60) scoreEl.className = 'text-4xl font-bold text-amber-400';
-            else scoreEl.className = 'text-4xl font-bold text-rose-400';
-
-            document.getElementById('res-bugs').textContent = data.totalBugsFound;
-            document.getElementById('res-summary').textContent = data.summary;
-
-            // Render Issues List
-            const issuesContainer = document.getElementById('res-issues-list');
-            issuesContainer.innerHTML = '';
-
-            data.issues.forEach(issue => {
-                const cardColor = severityColors[issue.severity] || severityColors['LOW'];
-                const badgeStyle = severityBadges[issue.severity] || severityBadges['LOW'];
-
-                const card = document.createElement('div');
-                card.className = `border-l-4 rounded-r-lg bg-slate-900 border-t border-r border-b border-slate-800 p-4 shadow-sm ${cardColor} transition-colors hover:bg-slate-800/80`;
-                
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold px-2 py-0.5 rounded ${badgeStyle}">${issue.severity}</span>
-                            <span class="text-xs font-semibold text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">${issue.issueType}</span>
+                // Test Cases Tab
+                const testList = document.getElementById('tests-list');
+                testList.innerHTML = '';
+                (data.testCases || []).forEach((tc, i) => {
+                    testList.innerHTML += `
+                        <div class="glass-panel p-4 rounded-xl">
+                            <h4 class="text-sm font-semibold text-brand-400 mb-2">Test Case ${i+1}: ${tc.purpose}</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-navy-950 p-2 rounded border border-slate-800"><span class="text-xs text-slate-500 block mb-1">Input</span><code class="text-sm text-slate-300 code-font">${tc.input}</code></div>
+                                <div class="bg-navy-950 p-2 rounded border border-slate-800"><span class="text-xs text-slate-500 block mb-1">Expected</span><code class="text-sm text-emerald-400 code-font">${tc.expected}</code></div>
+                            </div>
                         </div>
-                        <span class="text-xs font-mono text-slate-500 bg-slate-950 px-2 py-1 rounded">Line ${issue.lineNumber}</span>
-                    </div>
-                    <p class="text-sm text-slate-200 mt-2">${issue.description}</p>
-                    <div class="mt-3 bg-slate-950/50 rounded-md p-3 border border-slate-800/50">
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 flex items-center gap-1">
-                            <i data-lucide="zap" class="w-3 h-3"></i> Fix Recommendation
-                        </p>
-                        <p class="text-sm text-slate-400 leading-relaxed">${issue.recommendation}</p>
-                    </div>
-                `;
-                issuesContainer.appendChild(card);
-            });
-            
-            // Render Corrected Code
-            document.getElementById('res-corrected-code').textContent = data.correctedCode;
+                    `;
+                });
 
-            // UI Transition: Hide Loading, Show Results
-            stateLoading.classList.add('hidden');
-            stateResults.classList.remove('hidden');
-            
-            // Re-init lucide icons for newly injected DOM
-            lucide.createIcons();
-        }
+                // Quality Bars (Overview Tab)
+                const qb = document.getElementById('quality-bars');
+                qb.innerHTML = '';
+                const qData = data.quality || { readability: 85, maintainability: 70, modularity: 90 };
+                Object.entries(qData).forEach(([k, v]) => {
+                    qb.innerHTML += `
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-300 capitalize">${k}</span><span class="text-slate-400">${v}%</span></div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="bg-brand-500 h-1.5 rounded-full" style="width: ${v}%"></div></div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('btn-gen-report').classList.remove('hidden');
+                
+                // Show Results UI
+                document.getElementById('state-loading').classList.add('hidden');
+                document.getElementById('state-results').classList.remove('hidden');
+                document.getElementById('state-results').classList.add('flex');
+                
+                lucide.createIcons();
+            },
+
+            // ==========================================
+            // 5. MOCK AI SERVICE (For Demo/Fallback)
+            // ==========================================
+            generateMockData(lang, code) {
+                const isJava = lang === 'java';
+                
+                return {
+                    score: isJava ? 45 : 72,
+                    totalBugsFound: isJava ? 2 : 1,
+                    summary: isJava ? "The Java codebase is functional but contains critical security vulnerabilities (SQL Injection) and logical resource leaks. Immediate refactoring is required." : "The C++ code contains a potential memory leak due to unmanaged pointer allocation.",
+                    issues: isJava ? [
+                        {
+                            lineNumber: 4,
+                            issueType: "SECURITY",
+                            severity: "CRITICAL",
+                            title: "SQL Injection Vector",
+                            description: "User input is directly concatenated into the SQL query string, allowing attackers to manipulate the database.",
+                            recommendation: "Use PreparedStatement with parameterized queries.",
+                            fixCode: `String query = "SELECT * FROM users WHERE uname=? AND pword=?";\nPreparedStatement pstmt = conn.prepareStatement(query);\npstmt.setString(1, user);\npstmt.setString(2, pass);`
+                        },
+                        {
+                            lineNumber: 8,
+                            issueType: "RESOURCE_LEAK",
+                            severity: "MEDIUM",
+                            title: "Unclosed Database Connection",
+                            description: "Database resources are opened but never closed. This will eventually exhaust connection pools.",
+                            recommendation: "Wrap the database logic in a try-with-resources block.",
+                            fixCode: `try (Connection conn = dataSource.getConnection();\n     PreparedStatement pstmt = conn.prepareStatement(query)) {\n    // Execute query\n}`
+                        }
+                    ] : [
+                        {
+                            lineNumber: 4,
+                            issueType: "RESOURCE_LEAK",
+                            severity: "HIGH",
+                            title: "Memory Leak",
+                            description: "Heap memory allocated via 'new' is not deallocated using 'delete[]' before function exit.",
+                            recommendation: "Add delete[] data; at the end of the function, or use std::unique_ptr for automatic memory management.",
+                            fixCode: `std::unique_ptr<int[]> data(new int[100]);`
+                        }
+                    ],
+                    complexity: {
+                        time: "O(n)",
+                        timeExplanation: "Linear execution path based on the input size or result set iteration.",
+                        space: "O(1)",
+                        spaceExplanation: "No dynamically scaling auxiliary data structures are used."
+                    },
+                    performance: [
+                        "String concatenation in a loop (if any) should use StringBuilder.",
+                        "Consider utilizing connection pooling (e.g. HikariCP) instead of raw connections."
+                    ],
+                    quality: {
+                        readability: 80,
+                        maintainability: 40,
+                        security: 10
+                    },
+                    testCases: [
+                        { input: "'admin', 'password123'", expected: "true (if valid)", purpose: "Standard Auth" },
+                        { input: "'admin\\' OR \\'1\\'=\\'1', ''", expected: "false / Exception", purpose: "SQL Injection defense" },
+                        { input: "null, null", expected: "IllegalArgumentException", purpose: "Null handling" }
+                    ]
+                };
+            }
+        };
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', () => app.init());
+
     </script>
 </body>
 </html>
