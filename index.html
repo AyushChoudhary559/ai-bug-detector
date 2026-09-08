@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +7,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
+                tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
@@ -16,8 +15,17 @@
                         mono: ['"Fira Code"', '"JetBrains Mono"', 'monospace'],
                     },
                     colors: {
-                        navy: { 800: '#111827', 900: '#0b0f19', 950: '#06080d' },
-                        brand: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' }
+                        brand: { 400: '#4F7290', 500: '#355C7D', 600: '#2D4E6A' },
+                        success: { 400: '#87A288', 500: '#718A72', 600: '#5E745F' },
+                        warning: { 400: '#C99E75', 500: '#B9785D', 600: '#9E644D' },
+                        danger: { 400: '#C28383', 500: '#A75D5D', 600: '#8D4D4D' },
+                        surface: { 50: '#FFFFFF', 100: '#FAF8F3', 200: '#EFE9DD', 300: '#DDD8CE' },
+                        text: { main: '#242424', muted: '#6B6B6B', light: '#FFFFFF' },
+                        primarybg: '#F7F4EE'
+                    },
+                    boxShadow: {
+                        'premium': '0 4px 18px rgba(40, 35, 30, 0.08)',
+                        'premium-hover': '0 12px 24px rgba(40, 35, 30, 0.12)'
                     }
                 }
             }
@@ -32,190 +40,195 @@
     <!-- Custom Styles -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #e2e8f0; overflow-x: hidden; scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background-color: #F7F4EE; color: #242424; overflow-x: hidden; scroll-behavior: smooth; }
         .code-font { font-family: 'Fira Code', monospace; }
         
         /* Premium Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; border: 2px solid #0f172a; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        ::-webkit-scrollbar-track { background: #EFE9DD; }
+        ::-webkit-scrollbar-thumb { background: #DDD8CE; border-radius: 4px; border: 2px solid #F7F4EE; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B6B6B; }
         
         /* Navigation & Tabs */
         .nav-link { transition: all 0.2s ease; border-right: 3px solid transparent; }
-        .nav-link:hover { background-color: rgba(99, 102, 241, 0.05); color: #a5b4fc; }
-        .nav-link.active { background-color: rgba(99, 102, 241, 0.1); color: #818cf8; border-right: 3px solid #6366f1; }
-        .tab-btn.active { border-bottom: 2px solid #818cf8; color: #818cf8; }
+        .nav-link:hover { background-color: rgba(53, 92, 125, 0.05); color: #4F7290; }
+        .nav-link.active { background-color: rgba(53, 92, 125, 0.1); color: #355C7D; border-right: 3px solid #355C7D; }
+        .tab-btn.active { border-bottom: 2px solid #355C7D; color: #355C7D; }
         
         /* Views */
-        .view-section { display: none; opacity: 0; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(10px); }
-        .view-section.active { display: block; opacity: 1; transform: translateY(0); }
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease-out forwards; }
 
         /* Glassmorphism & Elevation */
-        .glass-panel { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        .glass-header { background: rgba(11, 15, 25, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .glow-text { text-shadow: 0 0 15px rgba(99, 102, 241, 0.4); }
+        .glass-panel { background: #FFFFFF; backdrop-filter: blur(12px); border: 1px solid #DDD8CE; box-shadow: 0 4px 18px rgba(40, 35, 30, 0.04); }
+        .glass-header { background: rgba(247, 244, 238, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid #DDD8CE; }
+        . { text-shadow: none; }
         
         /* Micro-interactions */
         .interactive-btn { transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, background-color 0.2s ease; }
         .interactive-btn:active { transform: scale(0.97); }
         .hover-lift { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease; }
-        .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2); border-color: rgba(99, 102, 241, 0.3); }
+        .hover-lift:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(40, 35, 30, 0.12); border-color: #355C7D; }
         
         /* Monaco Editor */
-        .monaco-highlight-line { background-color: rgba(225, 29, 72, 0.15); border-left: 3px solid #e11d48; margin-left: 2px; }
-        .editor-container { border: 1px solid rgba(255,255,255,0.08); border-radius: 0.5rem; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+        .monaco-highlight-line { background-color: rgba(167, 93, 93, 0.15); border-left: 3px solid #A75D5D; margin-left: 2px; }
+        .editor-container { border: 1px solid #DDD8CE; border-radius: 0.5rem; overflow: hidden; box-shadow: inset 0 2px 4px rgba(40,35,30,0.05); }
         
         /* Animations */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px rgba(99,102,241,0.2); } 50% { box-shadow: 0 0 25px rgba(99,102,241,0.5); } }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: none; } 50% { box-shadow: none; } }
         .animate-pulse-glow { animation: pulse-glow 2s infinite; }
         
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
         /* Toast Notifications */
         #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
-        .toast { background: #1e293b; border: 1px solid #334155; color: #f8fafc; padding: 12px 16px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); display: flex; items: center; gap: 12px; font-size: 0.875rem; transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; opacity: 0; }
+        .toast { background: #FFFFFF; border: 1px solid #DDD8CE; color: #242424; padding: 12px 16px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); display: flex; items: center; gap: 12px; font-size: 0.875rem; transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; opacity: 0; }
         .toast.show { transform: translateX(0); opacity: 1; }
-        .toast-success { border-left: 4px solid #10b981; }
-        .toast-error { border-left: 4px solid #ef4444; }
-        .toast-info { border-left: 4px solid #3b82f6; }
+        .toast-success { border-left: 4px solid #718A72; }
+        .toast-error { border-left: 4px solid #A75D5D; }
+        .toast-info { border-left: 4px solid #355C7D; }
         
         /* Radial Progress for Score */
         .radial-progress { transform: rotate(-90deg); }
         .radial-progress circle { transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="bg-navy-900 text-slate-300 font-sans min-h-screen relative flex flex-col">
+<body class="bg-surface-200 text-text-muted font-sans min-h-screen relative flex flex-col">
 
     <!-- Auth Modal -->
-    <div id="auth-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-navy-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300">
-            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
-                <div class="flex items-center gap-2 text-brand-400 font-bold text-lg"><i data-lucide="shield-check" class="w-6 h-6"></i> DevSentry AI</div>
-                <button onclick="app.closeAuthModal()" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+    <div id="auth-modal" class="fixed inset-0 bg-primarybg/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-surface-200 border border-surface-300 rounded-2xl w-full max-w-md overflow-hidden shadow-premium transform scale-95 transition-transform duration-300">
+            <div class="p-6 border-b border-surface-300 flex justify-between items-center">
+                <div class="flex items-center gap-2 text-brand-500 font-bold text-lg"><i data-lucide="shield-check" class="w-6 h-6"></i> DevSentry AI</div>
+                <button onclick="app.closeAuthModal()" class="text-text-muted hover:text-text-main"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-8">
                 <div class="mb-6">
-                    <h2 id="auth-title" class="text-xl font-semibold text-white mb-1">Sign In</h2>
-                    <p id="auth-subtitle" class="text-sm text-slate-400">Welcome back! Please enter your details.</p>
+                    <h2 id="auth-title" class="text-xl font-semibold text-text-main mb-1">Sign In</h2>
+                    <p id="auth-subtitle" class="text-sm text-text-muted">Welcome back! Please enter your details.</p>
                 </div>
                 <form onsubmit="event.preventDefault();" class="space-y-4">
-                    <div><label class="block text-sm text-slate-400 mb-1">Username (or Email for Login)</label><input type="text" id="auth-email" placeholder="john_doe" class="w-full bg-navy-950 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-brand-500 transition" required></div>
-                    <div><label class="block text-sm text-slate-400 mb-1">Password</label><input type="password" id="auth-password" class="w-full bg-navy-950 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-brand-500 transition" required></div>
-                    <button type="button" onclick="app.submitAuth(document.getElementById('auth-title').innerText === 'Create Account')" id="btn-signin" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-lg px-4 py-2 transition flex justify-center items-center gap-2">Sign In</button>
-                    <p id="auth-toggle" onclick="app.toggleAuthMode()" class="text-center text-sm text-slate-400 mt-4 cursor-pointer">Don't have an account? <span class="text-brand-500 font-medium hover:underline">Sign up</span></p>
+                    <div><label class="block text-sm text-text-muted mb-1">Username (or Email for Login)</label><input type="text" id="auth-email" placeholder="john_doe" class="w-full bg-primarybg border border-surface-300 rounded-lg px-4 py-2 text-text-main outline-none focus:border-brand-500 transition" required></div>
+                    <div><label class="block text-sm text-text-muted mb-1">Password</label><input type="password" id="auth-password" class="w-full bg-primarybg border border-surface-300 rounded-lg px-4 py-2 text-text-main outline-none focus:border-brand-500 transition" required></div>
+                    <button type="button" onclick="app.submitAuth(document.getElementById('auth-title').innerText === 'Create Account')" id="btn-signin" class="w-full bg-brand-500 text-white font-medium rounded-lg px-4 py-2 transition flex justify-center items-center gap-2">Sign In</button>
+                    <p id="auth-toggle" onclick="app.toggleAuthMode()" class="text-center text-sm text-text-muted mt-4 cursor-pointer">Don't have an account? <span class="text-brand-500 font-medium hover:underline">Sign up</span></p>
                 </form>
             </div>
         </div>
     </div>
 
     <!-- Alert Modal (For Empty Code etc) -->
-    <div id="alert-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-navy-900 border border-slate-800 rounded-2xl w-full max-w-sm p-6 text-center shadow-2xl">
-            <i data-lucide="info" class="w-12 h-12 text-brand-400 mx-auto mb-4" id="alert-icon"></i>
-            <h3 class="text-lg font-bold text-white mb-2" id="alert-title">Notification</h3>
-            <p class="text-sm text-slate-400 mb-6" id="alert-message">Message details.</p>
-            <button onclick="app.closeAlert()" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">Got it</button>
+    <div id="alert-modal" class="fixed inset-0 bg-primarybg/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-surface-200 border border-surface-300 rounded-2xl w-full max-w-sm p-6 text-center shadow-premium">
+            <i data-lucide="info" class="w-12 h-12 text-brand-500 mx-auto mb-4" id="alert-icon"></i>
+            <h3 class="text-lg font-bold text-text-main mb-2" id="alert-title">Notification</h3>
+            <p class="text-sm text-text-muted mb-6" id="alert-message">Message details.</p>
+            <button onclick="app.closeAlert()" class="bg-surface-200 hover:bg-surface-300 text-text-main px-6 py-2 rounded-lg font-medium transition w-full">Got it</button>
         </div>
     </div>
 
     <div class="flex flex-1 min-h-screen">
         
         <!-- Sidebar Navigation -->
-        <aside id="sidebar" class="w-64 fixed inset-y-0 left-0 z-50 bg-navy-950 border-r border-slate-800/60 flex flex-col transition-transform duration-300 transform -translate-x-full md:translate-x-0">
-            <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800/60 shrink-0 cursor-pointer hover:bg-slate-900/50 transition" onclick="app.navigate('dashboard')">
+        <aside id="sidebar" class="w-64 fixed inset-y-0 left-0 z-50 bg-primarybg border-r border-surface-300/60 flex flex-col transition-transform duration-300 transform -translate-x-full md:translate-x-0">
+            <div class="h-16 flex items-center justify-between px-6 border-b border-surface-300/60 shrink-0 cursor-pointer hover:bg-surface-100/50 transition" onclick="app.navigate('dashboard')">
                 <div class="flex items-center gap-3">
-                    <div class="bg-brand-500/10 p-2 rounded-lg text-brand-400"><i data-lucide="shield-check" class="w-6 h-6"></i></div>
-                    <h1 class="text-lg font-bold text-white tracking-tight">DevSentry <span class="text-brand-400">AI</span></h1>
+                    <div class="bg-brand-500/10 p-2 rounded-lg text-brand-500"><i data-lucide="shield-check" class="w-6 h-6"></i></div>
+                    <h1 class="text-lg font-bold text-text-main tracking-tight">DevSentry <span class="text-brand-500">AI</span></h1>
                 </div>
-                <button class="md:hidden text-slate-400 hover:text-white" onclick="app.toggleSidebar()"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button class="md:hidden text-text-muted hover:text-text-main" onclick="app.toggleSidebar()"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             
             <div class="flex-1 overflow-y-auto py-6 flex flex-col gap-2">
-                <div class="px-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Main Menu</div>
-                <button onclick="app.navigate('dashboard')" class="nav-link active w-full flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-slate-800/30 transition" data-target="dashboard">
+                <div class="px-6 mb-2 text-xs font-semibold text-text-muted uppercase tracking-wider">Main Menu</div>
+                <button onclick="app.navigate('dashboard')" class="nav-link active w-full flex items-center px-6 py-3 text-text-muted hover:text-text-main hover:bg-surface-200/30 transition" data-target="dashboard">
                     <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i><span class="ml-3 font-medium text-sm">Dashboard</span>
                 </button>
-                <button onclick="app.navigate('audit')" class="nav-link w-full flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-slate-800/30 transition" data-target="audit">
+                <button onclick="app.navigate('audit')" class="nav-link w-full flex items-center px-6 py-3 text-text-muted hover:text-text-main hover:bg-surface-200/30 transition" data-target="audit">
                     <i data-lucide="terminal-square" class="w-5 h-5 shrink-0"></i><span class="ml-3 font-medium text-sm">Code Audit</span>
                 </button>
-                <button onclick="app.navigate('security')" class="nav-link w-full flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-slate-800/30 transition" data-target="security">
+                <button onclick="app.navigate('security')" class="nav-link w-full flex items-center px-6 py-3 text-text-muted hover:text-text-main hover:bg-surface-200/30 transition" data-target="security">
                     <i data-lucide="shield-alert" class="w-5 h-5 shrink-0"></i><span class="ml-3 font-medium text-sm">Security Analysis</span>
                 </button>
                 
-                <div class="px-6 mt-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Workspace</div>
-                <button onclick="app.navigate('history')" class="nav-link w-full flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-slate-800/30 transition" data-target="history">
+                <div class="px-6 mt-6 mb-2 text-xs font-semibold text-text-muted uppercase tracking-wider">Workspace</div>
+                <button onclick="app.navigate('history')" class="nav-link w-full flex items-center px-6 py-3 text-text-muted hover:text-text-main hover:bg-surface-200/30 transition" data-target="history">
                     <i data-lucide="history" class="w-5 h-5 shrink-0"></i><span class="ml-3 font-medium text-sm">Audit History</span>
                 </button>
-                <button onclick="app.navigate('reports')" class="nav-link w-full flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-slate-800/30 transition" data-target="reports">
+                <button onclick="app.navigate('reports')" class="nav-link w-full flex items-center px-6 py-3 text-text-muted hover:text-text-main hover:bg-surface-200/30 transition" data-target="reports">
                     <i data-lucide="file-bar-chart-2" class="w-5 h-5 shrink-0"></i><span class="ml-3 font-medium text-sm">Reports</span>
                 </button>
-                <button onclick="app.navigate('settings')" class="nav-link w-full flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-slate-800/30 transition" data-target="settings">
+                <button onclick="app.navigate('settings')" class="nav-link w-full flex items-center px-6 py-3 text-text-muted hover:text-text-main hover:bg-surface-200/30 transition" data-target="settings">
                     <i data-lucide="settings" class="w-5 h-5 shrink-0"></i><span class="ml-3 font-medium text-sm">Settings</span>
                 </button>
             </div>
         </aside>
 
         <!-- Mobile Sidebar Overlay -->
-        <div id="sidebar-overlay" onclick="app.toggleSidebar(false)" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+        <div id="sidebar-overlay" onclick="app.toggleSidebar(false)" class="fixed inset-0 bg-primarybg/80 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
 
         <!-- Main Content Area -->
         <main class="flex-1 flex flex-col md:ml-64 w-full min-w-0 min-h-screen">
             
             <!-- Top Header -->
-            <header class="sticky top-0 z-30 bg-navy-950/80 backdrop-blur-md h-16 border-b border-slate-800/60 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm">
-                <div class="flex items-center gap-3 text-sm font-medium text-slate-400">
-                    <button class="md:hidden text-slate-400 hover:text-white p-1" onclick="app.toggleSidebar(true)"><i data-lucide="menu" class="w-6 h-6"></i></button>
+            <header class="sticky top-0 z-30 bg-primarybg/80 backdrop-blur-md h-16 border-b border-surface-300/60 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm animate-fade-up">
+                <div class="flex items-center gap-3 text-sm font-medium text-text-muted">
+                    <button class="md:hidden text-text-muted hover:text-text-main p-1" onclick="app.toggleSidebar(true)"><i data-lucide="menu" class="w-6 h-6"></i></button>
                     <div class="hidden sm:flex items-center">
-                        <span class="hover:text-white cursor-pointer" onclick="app.navigate('dashboard')">DevSentry AI</span>
+                        <span class="hover:text-text-main cursor-pointer" onclick="app.navigate('dashboard')">DevSentry AI</span>
                         <i data-lucide="chevron-right" class="w-4 h-4 mx-2 opacity-50"></i>
-                        <span id="breadcrumb-current" class="text-brand-400">Dashboard</span>
+                        <span id="breadcrumb-current" class="text-brand-500">Dashboard</span>
                     </div>
                 </div>
                 
                 <div class="flex items-center gap-3 sm:gap-5">
                     <!-- Global Language Selector -->
                     <div class="relative hidden sm:block">
-                        <i data-lucide="code" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <select id="global-lang-select" onchange="app.changeLanguage(this.value)" class="bg-navy-800 border border-slate-700 text-sm text-slate-200 rounded-md pl-9 pr-8 py-1.5 appearance-none outline-none focus:border-brand-500 hover:bg-slate-800 transition cursor-pointer">
+                        <i data-lucide="code" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"></i>
+                        <select id="global-lang-select" onchange="app.changeLanguage(this.value)" class="bg-surface-100 border border-surface-300 text-sm text-text-main rounded-md pl-9 pr-8 py-1.5 appearance-none outline-none focus:border-brand-500 hover:bg-surface-200 transition cursor-pointer">
                             <option value="java">Java</option>
                             <option value="cpp">C++</option>
                             <option value="python">Python</option>
                         </select>
-                        <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                        <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"></i>
                     </div>
                     
-                    <button onclick="app.toggleTheme()" class="text-slate-400 hover:text-brand-400 transition-colors p-1" title="Toggle Theme"><i data-lucide="moon" class="w-5 h-5"></i></button>
-                    <div class="w-px h-6 bg-slate-800 hidden sm:block"></div>
+                    <button onclick="app.toggleTheme()" class="text-text-muted hover:text-brand-500 transition-colors p-1" title="Toggle Theme"><i data-lucide="moon" class="w-5 h-5"></i></button>
+                    <div class="w-px h-6 bg-surface-200 hidden sm:block"></div>
 
                     <!-- User Profile Area -->
                     <div class="relative">
                         <div id="auth-logged-out">
-                            <button onclick="app.openAuthModal()" class="flex items-center gap-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition shadow-sm">
+                            <button onclick="app.openAuthModal()" class="flex items-center gap-2 text-sm font-medium text-text-main bg-surface-200 hover:bg-surface-300 px-3 py-1.5 rounded-lg border border-surface-300 transition shadow-sm">
                                 <i data-lucide="user" class="w-4 h-4"></i> <span class="hidden sm:inline">Sign In</span>
                             </button>
                         </div>
                         
                         <div id="auth-logged-in" class="hidden">
-                            <button onclick="app.toggleUserDropdown(event)" class="flex items-center gap-2 text-sm font-medium hover:text-white transition focus:outline-none">
-                                <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" alt="User" class="w-8 h-8 rounded-full border border-slate-700">
-                                <span class="hidden sm:inline text-slate-200" id="user-name">User</span>
-                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+                            <button onclick="app.toggleUserDropdown(event)" class="flex items-center gap-2 text-sm font-medium hover:text-text-main transition focus:outline-none">
+                                <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" alt="User" class="w-8 h-8 rounded-full border border-surface-300">
+                                <span class="hidden sm:inline text-text-main" id="user-name">User</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-text-muted"></i>
                             </button>
                             
                             <!-- Dropdown -->
-                            <div id="user-dropdown" class="absolute right-0 mt-2 w-56 bg-navy-950 border border-slate-800 rounded-xl shadow-xl hidden opacity-0 transition-opacity z-50 overflow-hidden">
-                                <div class="px-4 py-3 border-b border-slate-800 bg-slate-900/50">
-                                    <p class="text-sm font-medium text-white" id="dropdown-user-name">User</p>
-                                    <p class="text-xs text-slate-400 truncate" id="dropdown-user-email">user@devsentry.ai</p>
+                            <div id="user-dropdown" class="absolute right-0 mt-2 w-56 bg-primarybg border border-surface-300 rounded-xl shadow-xl hidden opacity-0 transition-opacity z-50 overflow-hidden">
+                                <div class="px-4 py-3 border-b border-surface-300 bg-surface-100/50">
+                                    <p class="text-sm font-medium text-text-main" id="dropdown-user-name">User</p>
+                                    <p class="text-xs text-text-muted truncate" id="dropdown-user-email">user@devsentry.ai</p>
                                 </div>
                                 <div class="py-1">
-                                    <button onclick="app.navigate('dashboard')" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex gap-2 transition"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> My Dashboard</button>
-                                    <button onclick="app.navigate('history')" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex gap-2 transition"><i data-lucide="history" class="w-4 h-4"></i> My Audits</button>
+                                    <button onclick="app.navigate('dashboard')" class="w-full text-left px-4 py-2 text-sm text-text-muted hover:bg-surface-200 hover:text-text-main flex gap-2 transition"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> My Dashboard</button>
+                                    <button onclick="app.navigate('history')" class="w-full text-left px-4 py-2 text-sm text-text-muted hover:bg-surface-200 hover:text-text-main flex gap-2 transition"><i data-lucide="history" class="w-4 h-4"></i> My Audits</button>
                                 </div>
-                                <div class="py-1 border-t border-slate-800">
-                                    <button onclick="app.mockSignOut()" class="w-full text-left px-4 py-2 text-sm text-rose-400 hover:bg-rose-500/10 flex gap-2 transition"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
+                                <div class="py-1 border-t border-surface-300">
+                                    <button onclick="app.mockSignOut()" class="w-full text-left px-4 py-2 text-sm text-danger-500 hover:bg-danger-600/10 flex gap-2 transition"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
                                 </div>
                             </div>
                         </div>
@@ -229,71 +242,70 @@
             <section id="view-dashboard" class="view-section active flex-1">
                 <div class="p-6 lg:p-10 max-w-7xl mx-auto w-full pb-24">
                     
-                    <!-- Hero / Welcome Section -->
-                    <div class="mb-10 p-8 lg:p-12 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-navy-900 to-[#0b0f19] rounded-3xl border border-slate-700/50 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] mix-blend-overlay"></div>
-                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-500 via-indigo-500 to-emerald-500 opacity-80"></div>
+                    <!-- Hero / Welcome Section --> <div class="mb-10 p-8 lg:p-12 bg-surface-50 rounded-3xl border border-surface-300/50 shadow-premium relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 animate-fade-up">
+                        <div class="absolute inset-0  opacity-[0.03] "></div>
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-500 via-indigo-500 to-success-500 opacity-80"></div>
                         
                         <div class="relative z-10 text-center md:text-left">
-                            <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">Good morning, <span id="hero-name" class="text-brand-400 glow-text">Developer</span> 👋</h1>
-                            <p class="text-lg text-slate-400 max-w-xl">Improve your code, understand your bugs, and build better software. Your AI coding mentor is ready.</p>
+                            <h1 class="text-4xl lg:text-5xl font-bold text-text-main mb-4 tracking-tight">Good morning, <span id="hero-name" class="text-brand-500 ">Developer</span> ??</h1>
+                            <p class="text-lg text-text-muted max-w-xl">Improve your code, understand your bugs, and build better software. Your AI coding mentor is ready.</p>
                         </div>
                         
                         <div class="relative z-10 flex flex-col gap-3 min-w-[200px]">
-                            <button onclick="app.resetAndNavigate('audit')" class="interactive-btn px-6 py-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-semibold shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                            <button onclick="app.resetAndNavigate('audit')" class="interactive-btn px-6 py-4 bg-brand-500 text-white rounded-xl font-semibold shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
                                 <i data-lucide="zap" class="w-5 h-5"></i> Quick Start Audit
                             </button>
-                            <div class="text-center text-xs text-slate-500 font-medium">Supports Java, C++, Python</div>
+                            <div class="text-center text-xs text-text-muted font-medium">Supports Java, C++, Python</div>
                         </div>
                     </div>
 
                     <!-- Statistics Cards -->
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-semibold text-white">Learning & Analytics</h2>
-                        <button onclick="app.navigate('reports')" class="text-sm font-medium text-brand-400 hover:text-brand-300 transition">View Full Report</button>
+                        <h2 class="text-lg font-semibold text-text-main">Learning & Analytics</h2>
+                        <button onclick="app.navigate('reports')" class="text-sm font-medium text-brand-500 hover:text-brand-600 transition">View Full Report</button>
                     </div>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-fade-up delay-100">
                         <!-- Total Audits -->
-                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-2xl border border-slate-700/50 hover-lift cursor-pointer group relative overflow-hidden">
-                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-brand-500/10 rounded-full blur-2xl group-hover:bg-brand-500/20 transition"></div>
+                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-2xl border border-surface-300/50 hover-lift cursor-pointer group relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-brand-500/10 rounded-full blur-2xl group-hover:bg-brand-600/20 transition"></div>
                             <div class="flex justify-between items-start mb-4 relative z-10">
-                                <div class="p-2.5 bg-slate-800 rounded-lg text-brand-400 border border-slate-700"><i data-lucide="layers" class="w-5 h-5"></i></div>
-                                <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">+12%</span>
+                                <div class="p-2.5 bg-surface-200 rounded-lg text-brand-500 border border-surface-300"><i data-lucide="layers" class="w-5 h-5"></i></div>
+                                <span class="text-xs font-semibold text-success-500 bg-success-500/10 px-2 py-1 rounded">+12%</span>
                             </div>
-                            <p class="text-sm font-medium text-slate-400 mb-1">Total Audits</p>
-                            <p class="text-4xl font-bold text-white tracking-tight" id="stat-total">0</p>
+                            <p class="text-sm font-medium text-text-muted mb-1">Total Audits</p>
+                            <p class="text-4xl font-bold text-text-main tracking-tight" id="stat-total">0</p>
                         </div>
                         
                         <!-- Avg Score -->
-                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-2xl border border-slate-700/50 hover-lift cursor-pointer group relative overflow-hidden">
-                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition"></div>
+                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-2xl border border-surface-300/50 hover-lift cursor-pointer group relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-success-500/10 rounded-full blur-2xl group-hover:bg-success-600/20 transition"></div>
                             <div class="flex justify-between items-start mb-4 relative z-10">
-                                <div class="p-2.5 bg-slate-800 rounded-lg text-emerald-400 border border-slate-700"><i data-lucide="activity" class="w-5 h-5"></i></div>
-                                <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">Top 15%</span>
+                                <div class="p-2.5 bg-surface-200 rounded-lg text-success-500 border border-surface-300"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                                <span class="text-xs font-semibold text-success-500 bg-success-500/10 px-2 py-1 rounded">Top 15%</span>
                             </div>
-                            <p class="text-sm font-medium text-slate-400 mb-1">Avg Quality Score</p>
-                            <p class="text-4xl font-bold text-white tracking-tight" id="stat-avg">0</p>
+                            <p class="text-sm font-medium text-text-muted mb-1">Avg Quality Score</p>
+                            <p class="text-4xl font-bold text-text-main tracking-tight" id="stat-avg">0</p>
                         </div>
                         
                         <!-- Bugs Found -->
-                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-2xl border border-slate-700/50 hover-lift cursor-pointer group relative overflow-hidden">
-                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition"></div>
+                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-2xl border border-surface-300/50 hover-lift cursor-pointer group relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-warning-500/10 rounded-full blur-2xl group-hover:bg-warning-500/20 transition"></div>
                             <div class="flex justify-between items-start mb-4 relative z-10">
-                                <div class="p-2.5 bg-slate-800 rounded-lg text-amber-400 border border-slate-700"><i data-lucide="bug" class="w-5 h-5"></i></div>
+                                <div class="p-2.5 bg-surface-200 rounded-lg text-warning-500 border border-surface-300"><i data-lucide="bug" class="w-5 h-5"></i></div>
                             </div>
-                            <p class="text-sm font-medium text-slate-400 mb-1">Bugs Detected</p>
-                            <p class="text-4xl font-bold text-white tracking-tight" id="stat-bugs">0</p>
+                            <p class="text-sm font-medium text-text-muted mb-1">Bugs Detected</p>
+                            <p class="text-4xl font-bold text-text-main tracking-tight" id="stat-bugs">0</p>
                         </div>
                         
                         <!-- Security -->
-                        <div onclick="app.navigate('security')" class="glass-panel p-6 rounded-2xl border border-slate-700/50 hover-lift cursor-pointer group relative overflow-hidden">
-                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition"></div>
+                        <div onclick="app.navigate('security')" class="glass-panel p-6 rounded-2xl border border-surface-300/50 hover-lift cursor-pointer group relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-danger-500/10 rounded-full blur-2xl group-hover:bg-danger-600/20 transition"></div>
                             <div class="flex justify-between items-start mb-4 relative z-10">
-                                <div class="p-2.5 bg-slate-800 rounded-lg text-rose-400 border border-slate-700"><i data-lucide="shield-alert" class="w-5 h-5"></i></div>
+                                <div class="p-2.5 bg-surface-200 rounded-lg text-danger-500 border border-surface-300"><i data-lucide="shield-alert" class="w-5 h-5"></i></div>
                             </div>
-                            <p class="text-sm font-medium text-slate-400 mb-1">Security Issues</p>
-                            <p class="text-4xl font-bold text-white tracking-tight" id="stat-sec">0</p>
+                            <p class="text-sm font-medium text-text-muted mb-1">Security Issues</p>
+                            <p class="text-4xl font-bold text-text-main tracking-tight" id="stat-sec">0</p>
                         </div>
                     </div>
 
@@ -306,11 +318,11 @@
             <section id="view-audit" class="view-section flex-1 p-4 lg:p-6 pb-24">
                 <div class="max-w-[1600px] mx-auto w-full h-full flex flex-col gap-4">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
-                        <h2 class="text-xl font-bold text-white">Code Audit & Analysis</h2>
+                        <h2 class="text-xl font-bold text-text-main">Code Audit & Analysis</h2>
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="app.loadTemplate('java')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-md border border-slate-700 transition">Load Java Demo</button>
-                            <button onclick="app.loadTemplate('cpp')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-md border border-slate-700 transition">Load C++ Demo</button>
-                            <button onclick="app.loadTemplate('python')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-md border border-slate-700 transition">Load Python Demo</button>
+                            <button onclick="app.loadTemplate('java')" class="px-3 py-1.5 bg-surface-200 hover:bg-surface-300 text-xs font-medium rounded-md border border-surface-300 transition">Load Java Demo</button>
+                            <button onclick="app.loadTemplate('cpp')" class="px-3 py-1.5 bg-surface-200 hover:bg-surface-300 text-xs font-medium rounded-md border border-surface-300 transition">Load C++ Demo</button>
+                            <button onclick="app.loadTemplate('python')" class="px-3 py-1.5 bg-surface-200 hover:bg-surface-300 text-xs font-medium rounded-md border border-surface-300 transition">Load Python Demo</button>
                         </div>
                     </div>
 
@@ -318,53 +330,53 @@
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
                         
                         <!-- LEFT PANEL: EDITOR -->
-                        <div class="flex flex-col border border-slate-800/80 rounded-xl overflow-hidden bg-navy-950 shadow-lg min-h-[500px] xl:h-[800px] xl:sticky xl:top-20">
+                        <div class="flex flex-col border border-surface-300/80 rounded-xl overflow-hidden bg-primarybg shadow-lg min-h-[500px] xl:h-[800px] xl:sticky xl:top-20">
                             <!-- Editor Toolbar -->
-                            <div class="h-12 border-b border-slate-800/80 flex items-center justify-between px-4 bg-slate-900 shrink-0">
+                            <div class="h-12 border-b border-surface-300/80 flex items-center justify-between px-4 bg-surface-100 shrink-0">
                                 <div class="flex items-center gap-4">
-                                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2"><i data-lucide="file-code" class="w-4 h-4 text-brand-400"></i> Source Code</span>
-                                    <div class="hidden sm:flex items-center gap-1 border-l border-slate-700 pl-4">
-                                        <button onclick="app.clearEditor()" class="p-1.5 text-slate-500 hover:text-white hover:bg-slate-800 rounded transition" title="Clear Editor"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                        <button onclick="app.copyCode()" class="p-1.5 text-slate-500 hover:text-white hover:bg-slate-800 rounded transition" title="Copy Code"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                                    <span class="text-xs font-semibold text-text-muted uppercase tracking-wider flex items-center gap-2"><i data-lucide="file-code" class="w-4 h-4 text-brand-500"></i> Source Code</span>
+                                    <div class="hidden sm:flex items-center gap-1 border-l border-surface-300 pl-4">
+                                        <button onclick="app.clearEditor()" class="p-1.5 text-text-muted hover:text-text-main hover:bg-surface-200 rounded transition" title="Clear Editor"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        <button onclick="app.copyCode()" class="p-1.5 text-text-muted hover:text-text-main hover:bg-surface-200 rounded transition" title="Copy Code"><i data-lucide="copy" class="w-4 h-4"></i></button>
                                     </div>
                                 </div>
-                                <button id="btn-run-audit" onclick="app.runAudit()" class="bg-brand-600 hover:bg-brand-500 text-white px-4 py-1.5 rounded-md text-sm font-medium transition shadow-lg flex items-center gap-2">
+                                <button id="btn-run-audit" onclick="app.runAudit()" class="bg-brand-500 text-white px-4 py-1.5 rounded-md text-sm font-medium transition shadow-lg flex items-center gap-2">
                                     <i data-lucide="zap" class="w-4 h-4 fill-current"></i> <span id="btn-run-text">Run AI Audit</span>
                                 </button>
                             </div>
                             <!-- Monaco Container -->
                             <div id="editor-container" class="flex-1 w-full relative">
-                                <div id="editor-loading" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-sm bg-navy-950 z-10">
+                                <div id="editor-loading" class="absolute inset-0 flex flex-col items-center justify-center text-text-muted text-sm bg-primarybg z-10">
                                     <i data-lucide="loader-2" class="w-6 h-6 animate-spin mb-3"></i> Initializing Editor...
                                 </div>
                             </div>
                         </div>
 
                         <!-- RIGHT PANEL: RESULTS -->
-                        <div class="flex flex-col bg-navy-950 border border-slate-800/80 rounded-xl overflow-hidden shadow-lg min-h-[500px]">
-                            <div class="h-12 border-b border-slate-800/80 flex items-center justify-between px-4 bg-slate-900 shrink-0">
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> Audit Results</span>
-                                <button id="btn-download-report" onclick="app.downloadCurrentReport()" class="hidden text-xs text-brand-400 hover:text-brand-300 font-medium transition flex items-center gap-1"><i data-lucide="download" class="w-3 h-3"></i> Export</button>
+                        <div class="flex flex-col bg-primarybg border border-surface-300/80 rounded-xl overflow-hidden shadow-lg min-h-[500px]">
+                            <div class="h-12 border-b border-surface-300/80 flex items-center justify-between px-4 bg-surface-100 shrink-0">
+                                <span class="text-xs font-semibold text-text-muted uppercase tracking-wider flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4 text-success-500"></i> Audit Results</span>
+                                <button id="btn-download-report" onclick="app.downloadCurrentReport()" class="hidden text-xs text-brand-500 hover:text-brand-600 font-medium transition flex items-center gap-1"><i data-lucide="download" class="w-3 h-3"></i> Export</button>
                             </div>
 
-                            <div class="flex-1 relative bg-navy-900/50">
+                            <div class="flex-1 relative bg-surface-200/50">
                                 <!-- EMPTY STATE -->
-                                <div id="state-empty" class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-navy-950 z-20 transition-opacity">
-                                    <div class="bg-slate-800/40 p-6 rounded-full border border-slate-800 mb-6"><i data-lucide="bot" class="w-12 h-12 text-brand-400 opacity-80"></i></div>
-                                    <h3 class="text-xl font-bold text-white mb-2">Ready for Inspection</h3>
-                                    <p class="text-sm text-slate-400 max-w-sm mb-8">Paste your Java, C++, or Python code and click "Run AI Audit" to start.</p>
+                                <div id="state-empty" class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-primarybg z-20 transition-opacity">
+                                    <div class="bg-surface-200/40 p-6 rounded-full border border-surface-300 mb-6"><i data-lucide="bot" class="w-12 h-12 text-brand-500 opacity-80"></i></div>
+                                    <h3 class="text-xl font-bold text-text-main mb-2">Ready for Inspection</h3>
+                                    <p class="text-sm text-text-muted max-w-sm mb-8">Paste your Java, C++, or Python code and click "Run AI Audit" to start.</p>
                                 </div>
 
                                 <!-- LOADING STATE -->
-                                <div id="state-loading" class="hidden absolute inset-0 flex flex-col items-center justify-center p-8 bg-navy-950 z-20">
+                                <div id="state-loading" class="hidden absolute inset-0 flex flex-col items-center justify-center p-8 bg-primarybg z-20">
                                     <div class="relative w-20 h-20 mb-8">
                                         <div class="absolute inset-0 rounded-full border-t-2 border-brand-500 animate-spin"></div>
-                                        <div class="absolute inset-2 rounded-full border-r-2 border-emerald-500 animate-spin" style="animation-duration: 1.5s;"></div>
-                                        <div class="absolute inset-0 flex items-center justify-center"><i data-lucide="cpu" class="w-6 h-6 text-brand-400 animate-pulse"></i></div>
+                                        <div class="absolute inset-2 rounded-full border-r-2 border-success-500 animate-spin" style="animation-duration: 1.5s;"></div>
+                                        <div class="absolute inset-0 flex items-center justify-center"><i data-lucide="cpu" class="w-6 h-6 text-brand-500 animate-pulse"></i></div>
                                     </div>
-                                    <h3 class="text-lg font-medium text-white mb-6">DevSentry AI is analyzing your code...</h3>
+                                    <h3 class="text-lg font-medium text-text-main mb-6">DevSentry AI is analyzing your code...</h3>
                                     <div class="w-64 space-y-3 text-sm" id="loading-steps">
-                                        <div class="flex items-center gap-3 text-slate-400" id="step-1"><i data-lucide="circle-dashed" class="w-4 h-4 animate-spin"></i> Initializing AI Audit...</div>
+                                        <div class="flex items-center gap-3 text-text-muted" id="step-1"><i data-lucide="circle-dashed" class="w-4 h-4 animate-spin"></i> Initializing AI Audit...</div>
                                         <div class="flex items-center gap-3 text-slate-600" id="step-2"><i data-lucide="circle" class="w-4 h-4"></i> Scanning Code...</div>
                                         <div class="flex items-center gap-3 text-slate-600" id="step-3"><i data-lucide="circle" class="w-4 h-4"></i> Analyzing Patterns...</div>
                                         <div class="flex items-center gap-3 text-slate-600" id="step-4"><i data-lucide="circle" class="w-4 h-4"></i> Checking Security...</div>
@@ -374,74 +386,74 @@
                                 </div>
 
                                 <!-- ERROR STATE -->
-                                <div id="state-error" class="hidden absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-navy-950 z-20">
-                                    <div class="bg-rose-500/10 p-4 rounded-full border border-rose-500/20 mb-4"><i data-lucide="server-crash" class="w-8 h-8 text-rose-500"></i></div>
-                                    <h3 class="text-lg font-medium text-rose-400 mb-2">AI Audit Failed</h3>
-                                    <p id="error-message" class="text-sm text-slate-400 max-w-sm mb-6">Unable to connect to the backend API. The service might be offline.</p>
+                                <div id="state-error" class="hidden absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-primarybg z-20">
+                                    <div class="bg-danger-500/10 p-4 rounded-full border border-danger-500/20 mb-4"><i data-lucide="server-crash" class="w-8 h-8 text-danger-600"></i></div>
+                                    <h3 class="text-lg font-medium text-danger-500 mb-2">AI Audit Failed</h3>
+                                    <p id="error-message" class="text-sm text-text-muted max-w-sm mb-6">Unable to connect to the backend API. The service might be offline.</p>
                                     <div class="flex gap-3 justify-center">
-                                        <button onclick="app.showEmpty()" class="px-4 py-2 bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700 hover:bg-slate-700 transition">Cancel</button>
-                                        <button onclick="app.runAudit(true)" class="px-4 py-2 bg-brand-600 text-white text-sm rounded-md shadow-lg hover:bg-brand-500 transition flex items-center gap-2">
+                                        <button onclick="app.showEmpty()" class="px-4 py-2 bg-surface-200 text-text-muted text-sm rounded-md border border-surface-300 hover:bg-surface-300 transition">Cancel</button>
+                                        <button onclick="app.runAudit(true)" class="px-4 py-2 bg-brand-500 text-white text-sm rounded-md shadow-lg hover:bg-brand-600 transition flex items-center gap-2">
                                             <i data-lucide="bot" class="w-4 h-4"></i> Use Demo Fallback
                                         </button>
                                     </div>
                                 </div>
 
                                 <!-- RESULTS STATE -->
-                                <div id="state-results" class="hidden flex-col h-full bg-navy-950 overflow-y-auto">
+                                <div id="state-results" class="hidden flex-col h-full bg-primarybg overflow-y-auto">
                                     <!-- Top Score Card -->
-                                    <div class="p-6 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-navy-950 to-navy-950 border-b border-slate-800/60 shrink-0 relative overflow-hidden">
-                                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.02]"></div>
+                                    <div class="p-6 bg-surface-50  via-surface-50 to-surface-50 border-b border-surface-300/60 shrink-0 relative overflow-hidden">
+                                        <div class="absolute inset-0  opacity-[0.02]"></div>
                                         <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10 cursor-pointer hover:opacity-90 transition-opacity" onclick="app.switchTab('tab-overview')">
                                             
                                             <div>
-                                                <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-2">OVERALL CODE QUALITY <span id="demo-badge" class="hidden text-[10px] bg-brand-500/20 text-brand-400 px-2 py-0.5 rounded border border-brand-500/30">DEMO</span></h2>
-                                                <p id="res-summary" class="text-sm text-slate-400 max-w-md line-clamp-2">Analysis complete.</p>
+                                                <h2 class="text-xl font-bold text-text-main flex items-center gap-2 mb-2">OVERALL CODE QUALITY <span id="demo-badge" class="hidden text-[10px] bg-brand-500/20 text-brand-500 px-2 py-0.5 rounded border border-brand-500/30">DEMO</span></h2>
+                                                <p id="res-summary" class="text-sm text-text-muted max-w-md line-clamp-2">Analysis complete.</p>
                                             </div>
 
                                             <div class="flex items-center gap-4">
                                                 <div class="radial-progress text-brand-500" style="--value:0; --size:6rem; --thickness: 0.5rem;" id="res-score-ring">
-                                                    <div class="flex flex-col items-center justify-center h-full w-full rounded-full bg-navy-950 border border-slate-800/50 shadow-inner">
-                                                        <div class="flex items-baseline gap-0.5"><span id="res-score" class="text-3xl font-bold tracking-tighter text-white">0</span></div>
+                                                    <div class="flex flex-col items-center justify-center h-full w-full rounded-full bg-primarybg border border-surface-300/50 shadow-sm">
+                                                        <div class="flex items-baseline gap-0.5"><span id="res-score" class="text-3xl font-bold tracking-tighter text-text-main">0</span></div>
                                                     </div>
                                                 </div>
                                             </div>
 
                                         </div>
                                         <div class="grid grid-cols-4 gap-3 mt-6 relative z-10">
-                                            <div onclick="app.switchTab('tab-issues')" class="glass-panel p-3 rounded-xl border border-slate-700/50 text-center cursor-pointer hover-lift">
-                                                <div class="text-2xl font-bold text-rose-400" id="res-stat-bugs">0</div>
-                                                <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Bugs</div>
+                                            <div onclick="app.switchTab('tab-issues')" class="glass-panel p-3 rounded-xl border border-surface-300/50 text-center cursor-pointer hover-lift">
+                                                <div class="text-2xl font-bold text-danger-500" id="res-stat-bugs">0</div>
+                                                <div class="text-[10px] uppercase tracking-wider text-text-muted font-semibold mt-1">Bugs</div>
                                             </div>
-                                            <div onclick="app.switchTab('tab-security')" class="glass-panel p-3 rounded-xl border border-slate-700/50 text-center cursor-pointer hover-lift">
-                                                <div class="text-2xl font-bold text-rose-500" id="res-stat-sec">0</div>
-                                                <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Security</div>
+                                            <div onclick="app.switchTab('tab-security')" class="glass-panel p-3 rounded-xl border border-surface-300/50 text-center cursor-pointer hover-lift">
+                                                <div class="text-2xl font-bold text-danger-600" id="res-stat-sec">0</div>
+                                                <div class="text-[10px] uppercase tracking-wider text-text-muted font-semibold mt-1">Security</div>
                                             </div>
-                                            <div onclick="app.switchTab('tab-performance')" class="glass-panel p-3 rounded-xl border border-slate-700/50 text-center cursor-pointer hover-lift">
-                                                <div class="text-2xl font-bold text-amber-400" id="res-stat-perf">0</div>
-                                                <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Perf Issues</div>
+                                            <div onclick="app.switchTab('tab-performance')" class="glass-panel p-3 rounded-xl border border-surface-300/50 text-center cursor-pointer hover-lift">
+                                                <div class="text-2xl font-bold text-warning-500" id="res-stat-perf">0</div>
+                                                <div class="text-[10px] uppercase tracking-wider text-text-muted font-semibold mt-1">Perf Issues</div>
                                             </div>
-                                            <div class="glass-panel p-3 rounded-xl border border-slate-700/50 text-center cursor-default">
+                                            <div class="glass-panel p-3 rounded-xl border border-surface-300/50 text-center cursor-default">
                                                 <div class="text-2xl font-bold text-blue-400" id="res-stat-smells">0</div>
-                                                <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Smells</div>
+                                                <div class="text-[10px] uppercase tracking-wider text-text-muted font-semibold mt-1">Smells</div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Sticky Tabs -->
-                                    <div class="sticky top-0 z-10 bg-navy-950/90 backdrop-blur-md border-b border-slate-800/60 px-2 flex overflow-x-auto hide-scrollbar shrink-0 shadow-sm">
-                                        <button class="tab-btn active px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-overview">Overview</button>
-                                        <button class="tab-btn px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-issues">Bugs</button>
-                                        <button class="tab-btn px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-security">Security</button>
-                                        <button class="tab-btn px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-performance">Performance</button>
-                                        <button class="tab-btn px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-complexity">Complexity</button>
-                                        <button class="tab-btn px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap transition-colors" data-target="tab-tests">Test Cases</button>
+                                    <div class="sticky top-0 z-10 bg-primarybg/90 backdrop-blur-md border-b border-surface-300/60 px-2 flex overflow-x-auto hide-scrollbar shrink-0 shadow-sm">
+                                        <button class="tab-btn active px-4 py-3 text-sm font-medium text-text-muted hover:text-text-main whitespace-nowrap transition-colors" data-target="tab-overview">Overview</button>
+                                        <button class="tab-btn px-4 py-3 text-sm font-medium text-text-muted hover:text-text-main whitespace-nowrap transition-colors" data-target="tab-issues">Bugs</button>
+                                        <button class="tab-btn px-4 py-3 text-sm font-medium text-text-muted hover:text-text-main whitespace-nowrap transition-colors" data-target="tab-security">Security</button>
+                                        <button class="tab-btn px-4 py-3 text-sm font-medium text-text-muted hover:text-text-main whitespace-nowrap transition-colors" data-target="tab-performance">Performance</button>
+                                        <button class="tab-btn px-4 py-3 text-sm font-medium text-text-muted hover:text-text-main whitespace-nowrap transition-colors" data-target="tab-complexity">Complexity</button>
+                                        <button class="tab-btn px-4 py-3 text-sm font-medium text-text-muted hover:text-text-main whitespace-nowrap transition-colors" data-target="tab-tests">Test Cases</button>
                                     </div>
 
                                     <!-- Tab Content Wrapper -->
                                     <div class="p-6">
                                         <!-- TAB: OVERVIEW -->
                                         <div id="tab-overview" class="tab-content active space-y-6">
-                                            <p id="res-summary" class="text-sm text-slate-300 leading-relaxed"></p>
+                                            <p id="res-summary" class="text-sm text-text-muted leading-relaxed"></p>
                                             <div class="space-y-4 glass-panel p-5 rounded-xl" id="quality-bars"></div>
                                         </div>
 
@@ -463,15 +475,15 @@
                                         <!-- TAB: COMPLEXITY -->
                                         <div id="tab-complexity" class="tab-content space-y-6">
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                <div class="glass-panel p-5 rounded-xl border-t-2 border-t-emerald-500">
-                                                    <div class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Time Complexity</div>
-                                                    <div class="text-3xl font-mono text-white mb-3" id="comp-time">O(n)</div>
-                                                    <p class="text-sm text-slate-300" id="comp-time-desc"></p>
+                                                <div class="glass-panel p-5 rounded-xl border-t-2 border-t-success-500">
+                                                    <div class="text-xs text-text-muted font-bold uppercase tracking-wider mb-1">Time Complexity</div>
+                                                    <div class="text-3xl font-mono text-text-main mb-3" id="comp-time">O(n)</div>
+                                                    <p class="text-sm text-text-muted" id="comp-time-desc"></p>
                                                 </div>
                                                 <div class="glass-panel p-5 rounded-xl border-t-2 border-t-brand-500">
-                                                    <div class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Space Complexity</div>
-                                                    <div class="text-3xl font-mono text-white mb-3" id="comp-space">O(1)</div>
-                                                    <p class="text-sm text-slate-300" id="comp-space-desc"></p>
+                                                    <div class="text-xs text-text-muted font-bold uppercase tracking-wider mb-1">Space Complexity</div>
+                                                    <div class="text-3xl font-mono text-text-main mb-3" id="comp-space">O(1)</div>
+                                                    <p class="text-sm text-text-muted" id="comp-space-desc"></p>
                                                 </div>
                                             </div>
                                         </div>
@@ -479,7 +491,7 @@
                                         <!-- TAB: TEST CASES -->
                                         <div id="tab-tests" class="tab-content space-y-4">
                                             <div class="flex justify-between items-center mb-2">
-                                                <h3 class="text-sm font-semibold text-white">Suggested Test Cases</h3>
+                                                <h3 class="text-sm font-semibold text-text-main">Suggested Test Cases</h3>
                                             </div>
                                             <div id="tests-list" class="space-y-4"></div>
                                         </div>
@@ -498,15 +510,15 @@
             <section id="view-history" class="view-section flex-1 p-6 lg:p-10 pb-24">
                 <div class="max-w-6xl mx-auto w-full">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-white flex items-center gap-2"><i data-lucide="history" class="w-6 h-6 text-emerald-400"></i> Audit History</h2>
-                        <button onclick="app.clearHistory()" class="px-4 py-2 bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 text-sm font-medium rounded-md border border-slate-700 transition flex gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Clear</button>
+                        <h2 class="text-2xl font-bold text-text-main flex items-center gap-2"><i data-lucide="history" class="w-6 h-6 text-success-500"></i> Audit History</h2>
+                        <button onclick="app.clearHistory()" class="px-4 py-2 bg-surface-200 hover:bg-danger-600/20 text-text-muted hover:text-danger-500 text-sm font-medium rounded-md border border-surface-300 transition flex gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Clear</button>
                     </div>
                     
-                    <div class="glass-panel rounded-xl overflow-hidden border border-slate-800">
+                    <div class="glass-panel rounded-xl overflow-hidden border border-surface-300">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="bg-slate-900 border-b border-slate-800 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                                    <tr class="bg-surface-100 border-b border-surface-300 text-xs uppercase tracking-wider text-text-muted font-semibold">
                                         <th class="p-4">Date</th>
                                         <th class="p-4">Language</th>
                                         <th class="p-4 text-center">Score</th>
@@ -515,15 +527,15 @@
                                         <th class="p-4">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody id="history-table-body" class="divide-y divide-slate-800">
+                                <tbody id="history-table-body" class="divide-y divide-surface-300">
                                     <!-- History rows dynamically injected -->
                                 </tbody>
                             </table>
                         </div>
                         <div id="history-empty" class="p-16 text-center hidden">
                             <i data-lucide="inbox" class="w-12 h-12 text-slate-600 mx-auto mb-4"></i>
-                            <p class="text-slate-400 font-medium">No audits found in local history.</p>
-                            <button onclick="app.navigate('audit')" class="mt-4 text-brand-400 hover:text-brand-300 text-sm font-medium">Run your first audit</button>
+                            <p class="text-text-muted font-medium">No audits found in local history.</p>
+                            <button onclick="app.navigate('audit')" class="mt-4 text-brand-500 hover:text-brand-600 text-sm font-medium">Run your first audit</button>
                         </div>
                     </div>
                 </div>
@@ -534,29 +546,29 @@
                  ============================== -->
             <section id="view-reports" class="view-section flex-1 p-6 lg:p-10 pb-24">
                 <div class="max-w-6xl mx-auto w-full">
-                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2"><i data-lucide="file-bar-chart-2" class="w-6 h-6 text-amber-400"></i> Report Center</h2>
+                    <h2 class="text-2xl font-bold text-text-main mb-6 flex items-center gap-2"><i data-lucide="file-bar-chart-2" class="w-6 h-6 text-warning-500"></i> Report Center</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="glass-panel p-8 rounded-xl border border-slate-800">
-                            <h3 class="text-lg font-bold text-white mb-4">Latest Audit Report</h3>
-                            <p class="text-sm text-slate-400 mb-6">Download a complete breakdown of your most recent AI analysis, including metrics, security vulnerabilities, and code fixes.</p>
-                            <button onclick="app.downloadCurrentReport()" class="w-full px-4 py-3 bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-lg shadow-lg transition flex items-center justify-center gap-2">
+                        <div class="glass-panel p-8 rounded-xl border border-surface-300">
+                            <h3 class="text-lg font-bold text-text-main mb-4">Latest Audit Report</h3>
+                            <p class="text-sm text-text-muted mb-6">Download a complete breakdown of your most recent AI analysis, including metrics, security vulnerabilities, and code fixes.</p>
+                            <button onclick="app.downloadCurrentReport()" class="w-full px-4 py-3 bg-brand-500 text-white font-medium rounded-lg shadow-lg transition flex items-center justify-center gap-2">
                                 <i data-lucide="download-cloud" class="w-5 h-5"></i> Download PDF / JSON
                             </button>
                         </div>
-                        <div class="glass-panel p-8 rounded-xl border border-slate-800">
-                            <h3 class="text-lg font-bold text-white mb-4">Global Analytics</h3>
+                        <div class="glass-panel p-8 rounded-xl border border-surface-300">
+                            <h3 class="text-lg font-bold text-text-main mb-4">Global Analytics</h3>
                             <div class="space-y-4">
-                                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                                    <span class="text-sm text-slate-400">Total Code Analyzed</span>
-                                    <span class="text-sm font-bold text-white" id="rep-total-audits">0 times</span>
+                                <div class="flex justify-between items-center border-b border-surface-300 pb-2">
+                                    <span class="text-sm text-text-muted">Total Code Analyzed</span>
+                                    <span class="text-sm font-bold text-text-main" id="rep-total-audits">0 times</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                                    <span class="text-sm text-slate-400">Average Quality Score</span>
-                                    <span class="text-sm font-bold text-emerald-400" id="rep-avg-score">0 / 100</span>
+                                <div class="flex justify-between items-center border-b border-surface-300 pb-2">
+                                    <span class="text-sm text-text-muted">Average Quality Score</span>
+                                    <span class="text-sm font-bold text-success-500" id="rep-avg-score">0 / 100</span>
                                 </div>
                                 <div class="flex justify-between items-center pb-2">
-                                    <span class="text-sm text-slate-400">Most Used Language</span>
-                                    <span class="text-sm font-bold text-brand-400" id="rep-top-lang">-</span>
+                                    <span class="text-sm text-text-muted">Most Used Language</span>
+                                    <span class="text-sm font-bold text-brand-500" id="rep-top-lang">-</span>
                                 </div>
                             </div>
                         </div>
@@ -569,20 +581,20 @@
                  ============================== -->
             <section id="view-security" class="view-section flex-1 p-6 lg:p-10 pb-24">
                 <div class="max-w-4xl mx-auto w-full text-center py-10">
-                    <div class="inline-flex p-4 bg-rose-500/10 rounded-full mb-6 border border-rose-500/20">
-                        <i data-lucide="shield-alert" class="w-16 h-16 text-rose-500"></i>
+                    <div class="inline-flex p-4 bg-danger-500/10 rounded-full mb-6 border border-danger-500/20">
+                        <i data-lucide="shield-alert" class="w-16 h-16 text-danger-600"></i>
                     </div>
-                    <h2 class="text-3xl font-bold text-white mb-4">Deep Security Scan</h2>
-                    <p class="text-slate-400 mb-10 max-w-xl mx-auto">Analyze your codebase exclusively for critical vulnerabilities, hardcoded secrets, injection vectors, and compliance violations using the DevSentry AI Security Engine.</p>
+                    <h2 class="text-3xl font-bold text-text-main mb-4">Deep Security Scan</h2>
+                    <p class="text-text-muted mb-10 max-w-xl mx-auto">Analyze your codebase exclusively for critical vulnerabilities, hardcoded secrets, injection vectors, and compliance violations using the DevSentry AI Security Engine.</p>
                     
-                    <button onclick="app.startSecurityScan()" class="px-8 py-4 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl shadow-lg shadow-rose-500/20 transition flex items-center gap-3 mx-auto transform hover:scale-105">
+                    <button onclick="app.startSecurityScan()" class="px-8 py-4 bg-danger-500 text-white font-bold rounded-xl shadow-lg shadow-danger-500/20 transition flex items-center gap-3 mx-auto transform hover:scale-105">
                         <i data-lucide="radar" class="w-6 h-6"></i> Initialize Security Scan
                     </button>
                     
                     <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
-                        <div class="bg-navy-950 p-4 rounded-lg border border-slate-800"><i data-lucide="database" class="w-5 h-5 text-slate-500 mb-2"></i><h4 class="text-sm font-semibold text-white">Injection Flaws</h4><p class="text-xs text-slate-500 mt-1">SQLi, XSS, Command Injection detection.</p></div>
-                        <div class="bg-navy-950 p-4 rounded-lg border border-slate-800"><i data-lucide="key" class="w-5 h-5 text-slate-500 mb-2"></i><h4 class="text-sm font-semibold text-white">Secret Leaks</h4><p class="text-xs text-slate-500 mt-1">API keys and hardcoded passwords.</p></div>
-                        <div class="bg-navy-950 p-4 rounded-lg border border-slate-800"><i data-lucide="cpu" class="w-5 h-5 text-slate-500 mb-2"></i><h4 class="text-sm font-semibold text-white">Memory Safety</h4><p class="text-xs text-slate-500 mt-1">Buffer overflows & memory leaks.</p></div>
+                        <div class="bg-primarybg p-4 rounded-lg border border-surface-300"><i data-lucide="database" class="w-5 h-5 text-text-muted mb-2"></i><h4 class="text-sm font-semibold text-text-main">Injection Flaws</h4><p class="text-xs text-text-muted mt-1">SQLi, XSS, Command Injection detection.</p></div>
+                        <div class="bg-primarybg p-4 rounded-lg border border-surface-300"><i data-lucide="key" class="w-5 h-5 text-text-muted mb-2"></i><h4 class="text-sm font-semibold text-text-main">Secret Leaks</h4><p class="text-xs text-text-muted mt-1">API keys and hardcoded passwords.</p></div>
+                        <div class="bg-primarybg p-4 rounded-lg border border-surface-300"><i data-lucide="cpu" class="w-5 h-5 text-text-muted mb-2"></i><h4 class="text-sm font-semibold text-text-main">Memory Safety</h4><p class="text-xs text-text-muted mt-1">Buffer overflows & memory leaks.</p></div>
                     </div>
                 </div>
             </section>
@@ -592,31 +604,31 @@
                  ============================== -->
             <section id="view-settings" class="view-section flex-1 p-6 lg:p-10 pb-24">
                 <div class="max-w-3xl mx-auto w-full">
-                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2"><i data-lucide="settings" class="w-6 h-6 text-slate-400"></i> Settings</h2>
-                    <div class="glass-panel p-6 rounded-xl border border-slate-800 space-y-6">
+                    <h2 class="text-2xl font-bold text-text-main mb-6 flex items-center gap-2"><i data-lucide="settings" class="w-6 h-6 text-text-muted"></i> Settings</h2>
+                    <div class="glass-panel p-6 rounded-xl border border-surface-300 space-y-6">
                         
-                        <div class="flex items-center justify-between border-b border-slate-800 pb-6">
+                        <div class="flex items-center justify-between border-b border-surface-300 pb-6">
                             <div>
-                                <h3 class="text-base font-semibold text-white">Dark Mode</h3>
-                                <p class="text-sm text-slate-400">Toggle dark/light theme (Always dark in demo).</p>
+                                <h3 class="text-base font-semibold text-text-main">Dark Mode</h3>
+                                <p class="text-sm text-text-muted">Toggle dark/light theme (Always dark in demo).</p>
                             </div>
-                            <button onclick="app.showAlert('Info', 'Dark mode is permanently enabled for DevSentry AI.')" class="bg-slate-700 w-12 h-6 rounded-full relative transition"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
+                            <button onclick="app.showAlert('Info', 'Dark mode is permanently enabled for DevSentry AI.')" class="bg-surface-300 w-12 h-6 rounded-full relative transition"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
                         </div>
                         
-                        <div class="flex items-center justify-between border-b border-slate-800 pb-6">
+                        <div class="flex items-center justify-between border-b border-surface-300 pb-6">
                             <div>
-                                <h3 class="text-base font-semibold text-white">Auto-Format Code</h3>
-                                <p class="text-sm text-slate-400">Format code before audit execution.</p>
+                                <h3 class="text-base font-semibold text-text-main">Auto-Format Code</h3>
+                                <p class="text-sm text-text-muted">Format code before audit execution.</p>
                             </div>
-                            <button class="bg-brand-600 w-12 h-6 rounded-full relative transition"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
+                            <button class="bg-brand-500 text-white w-12 h-6 rounded-full relative transition"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
                         </div>
 
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-base font-semibold text-rose-400">Reset Local Data</h3>
-                                <p class="text-sm text-slate-400">Clear all history, reports, and local storage.</p>
+                                <h3 class="text-base font-semibold text-danger-500">Reset Local Data</h3>
+                                <p class="text-sm text-text-muted">Clear all history, reports, and local storage.</p>
                             </div>
-                            <button onclick="app.clearHistory(); app.mockSignOut(); app.showAlert('Success', 'Local data cleared successfully.')" class="px-4 py-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded text-sm font-medium transition border border-rose-500/20 hover:border-rose-500">Reset Data</button>
+                            <button onclick="app.clearHistory(); app.mockSignOut(); app.showAlert('Success', 'Local data cleared successfully.')" class="px-4 py-2 bg-danger-500/10 text-danger-500 hover:bg-danger-600 hover:text-text-main rounded text-sm font-medium transition border border-danger-500/20 hover:border-danger-500">Reset Data</button>
                         </div>
 
                     </div>
@@ -627,7 +639,7 @@
     </div>
 
     <!-- Scroll to Top -->
-    <button onclick="window.scrollTo({top:0, behavior:'smooth'})" id="fab-top" class="fixed bottom-6 right-6 p-3 bg-brand-600 hover:bg-brand-500 text-white rounded-full shadow-xl transform scale-0 transition-all z-40 focus:outline-none"><i data-lucide="arrow-up" class="w-5 h-5"></i></button>
+    <button onclick="window.scrollTo({top:0, behavior:'smooth'})" id="fab-top" class="fixed bottom-6 right-6 p-3 bg-brand-500 text-white rounded-full shadow-xl transform scale-0 transition-all z-40 focus:outline-none"><i data-lucide="arrow-up" class="w-5 h-5"></i></button>
 
     <script>
         const API_BASE_URL = 'http://localhost:8080/api';
@@ -840,7 +852,7 @@
                     <i data-lucide="${iconName}" class="w-5 h-5"></i>
                     <div>
                         <h4 class="font-semibold text-sm">${title}</h4>
-                        <p class="text-xs text-slate-300 opacity-90">${msg}</p>
+                        <p class="text-xs text-text-muted opacity-90">${msg}</p>
                     </div>
                 `;
                 
@@ -888,7 +900,7 @@
                 require(['vs/editor/editor.main'], () => {
                     document.getElementById('editor-loading').style.display = 'none';
                     this.editor = monaco.editor.create(document.getElementById('editor-container'), {
-                        value: "", language: 'java', theme: 'vs-dark', automaticLayout: true,
+                        value: "", language: 'java', theme: 'vs', automaticLayout: true,
                         fontFamily: '"Fira Code", monospace', fontSize: 14, minimap: { enabled: false }, padding: { top: 16 }, scrollBeyondLastLine: false
                     });
                 });
@@ -1060,11 +1072,11 @@
                     const btnText = document.getElementById('btn-run-text');
                     
                     if (current > 0 && current <= steps.length && steps[current-1]) {
-                        steps[current-1].className = "flex items-center gap-3 text-emerald-400";
+                        steps[current-1].className = "flex items-center gap-3 text-success-500";
                         steps[current-1].innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i> ${texts[current-1]}`;
                     }
                     if (current < steps.length && steps[current]) {
-                        steps[current].className = "flex items-center gap-3 text-brand-400";
+                        steps[current].className = "flex items-center gap-3 text-brand-500";
                         steps[current].innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> <span class="font-medium">${texts[current]}</span>`;
                         if(btnText) btnText.textContent = texts[current];
                         lucide.createIcons();
@@ -1089,7 +1101,7 @@
                     resScore.textContent = s;
                 }
                 if(resScoreRing) {
-                    const colorClass = s >= 80 ? 'text-emerald-500' : s >= 60 ? 'text-amber-500' : 'text-rose-500';
+                    const colorClass = s >= 80 ? 'text-success-600' : s >= 60 ? 'text-warning-600' : 'text-danger-600';
                     resScoreRing.className = `radial-progress ${colorClass} transition-all duration-1000 ease-out`;
                     
                     // Animate the ring from 0 to target score
@@ -1117,7 +1129,7 @@
                 const pList = document.getElementById('perf-list');
                 if(pList) {
                     pList.innerHTML = '';
-                    (data.performance || ["Code path is optimal."]).forEach(p => pList.innerHTML += `<li class="flex gap-2 text-slate-300"><i data-lucide="zap" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i> ${p}</li>`);
+                    (data.performance || ["Code path is optimal."]).forEach(p => pList.innerHTML += `<li class="flex gap-2 text-text-muted"><i data-lucide="zap" class="w-4 h-4 text-warning-500 shrink-0 mt-0.5"></i> ${p}</li>`);
                 }
 
                 // Complexity
@@ -1133,15 +1145,15 @@
                 if(tList) {
                     tList.innerHTML = '';
                     if (!data.testCases || data.testCases.length === 0) {
-                        tList.innerHTML = `<div class="p-6 text-center text-slate-400 glass-panel rounded-xl">No test cases generated.</div>`;
+                        tList.innerHTML = `<div class="p-6 text-center text-text-muted glass-panel rounded-xl">No test cases generated.</div>`;
                     } else {
                         data.testCases.forEach((tc, i) => {
                             tList.innerHTML += `
                                 <div class="glass-panel p-4 rounded-xl border-l-2 border-l-brand-500">
-                                    <h4 class="text-sm font-semibold text-brand-400 mb-2">Test Case ${i+1}: ${tc.purpose}</h4>
+                                    <h4 class="text-sm font-semibold text-brand-500 mb-2">Test Case ${i+1}: ${tc.purpose}</h4>
                                     <div class="grid grid-cols-2 gap-4">
-                                        <div class="bg-navy-950 p-2 rounded border border-slate-800"><span class="text-xs text-slate-500 block mb-1">Input</span><code class="text-sm text-slate-300 code-font">${tc.input}</code></div>
-                                        <div class="bg-navy-950 p-2 rounded border border-slate-800"><span class="text-xs text-slate-500 block mb-1">Expected Output</span><code class="text-sm text-emerald-400 code-font">${tc.expected}</code></div>
+                                        <div class="bg-primarybg p-2 rounded border border-surface-300"><span class="text-xs text-text-muted block mb-1">Input</span><code class="text-sm text-text-muted code-font">${tc.input}</code></div>
+                                        <div class="bg-primarybg p-2 rounded border border-surface-300"><span class="text-xs text-text-muted block mb-1">Expected Output</span><code class="text-sm text-success-500 code-font">${tc.expected}</code></div>
                                     </div>
                                 </div>`;
                         });
@@ -1156,8 +1168,8 @@
                         if (k === 'smells') return;
                         qb.innerHTML += `
                             <div>
-                                <div class="flex justify-between text-xs mb-1"><span class="text-slate-300 capitalize">${k}</span><span class="text-slate-400">${v}/100</span></div>
-                                <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden"><div class="bg-brand-500 h-full rounded-full" style="width: ${v}%"></div></div>
+                                <div class="flex justify-between text-xs mb-1"><span class="text-text-muted capitalize">${k}</span><span class="text-text-muted">${v}/100</span></div>
+                                <div class="w-full bg-surface-200 rounded-full h-2 overflow-hidden"><div class="bg-brand-500 h-full rounded-full" style="width: ${v}%"></div></div>
                             </div>`;
                     });
                 }
@@ -1175,7 +1187,7 @@
                 if(!container) return;
                 container.innerHTML = '';
                 if (list.length === 0) {
-                    container.innerHTML = `<div class="p-6 text-center text-emerald-400 glass-panel rounded-xl flex flex-col items-center"><i data-lucide="check-circle" class="w-8 h-8 mb-2"></i>${emptyMsg}</div>`;
+                    container.innerHTML = `<div class="p-6 text-center text-success-500 glass-panel rounded-xl flex flex-col items-center"><i data-lucide="check-circle" class="w-8 h-8 mb-2"></i>${emptyMsg}</div>`;
                 } else {
                     list.forEach((issue, idx) => {
                         const isCrit = issue.severity === 'CRITICAL' || issue.severity === 'HIGH';
@@ -1196,41 +1208,41 @@
                             <div class="glass-panel border-l-4 border-l-${col}-500 rounded-r-xl p-5 shadow-sm mb-4 hover-lift">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-${col}-500/20 text-${col}-400 border border-${col}-500/30">${issue.severity}</span>
-                                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Bug #${idx+1}</span>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-${col}-500/20 text-${col}-500 border border-${col}-500/30">${issue.severity}</span>
+                                        <span class="text-xs font-semibold text-text-muted uppercase tracking-wide">Bug #${idx+1}</span>
                                     </div>
-                                    ${issue.lineNumber ? `<button onclick="app.highlightLine(${issue.lineNumber})" class="text-xs font-mono text-brand-400 hover:text-brand-300 bg-brand-500/10 hover:bg-brand-500/20 px-2 py-1 rounded transition flex items-center gap-1 interactive-btn"><i data-lucide="target" class="w-3 h-3"></i> Line ${issue.lineNumber}</button>` : ''}
+                                    ${issue.lineNumber ? `<button onclick="app.highlightLine(${issue.lineNumber})" class="text-xs font-mono text-brand-500 hover:text-brand-600 bg-brand-500/10 hover:bg-brand-600/20 px-2 py-1 rounded transition flex items-center gap-1 interactive-btn"><i data-lucide="target" class="w-3 h-3"></i> Line ${issue.lineNumber}</button>` : ''}
                                 </div>
-                                <h4 class="text-base font-semibold text-white mb-4">${issue.title || 'Issue Detected'}</h4>
+                                <h4 class="text-base font-semibold text-text-main mb-4">${issue.title || 'Issue Detected'}</h4>
                                 
                                 <div class="space-y-4 mb-5">
-                                    <div class="bg-navy-950/50 p-3 rounded-lg border border-slate-800/50">
-                                        <h5 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">What Happened</h5>
-                                        <p class="text-sm text-slate-300">${issue.description}</p>
+                                    <div class="bg-primarybg/50 p-3 rounded-lg border border-surface-300/50">
+                                        <h5 class="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">What Happened</h5>
+                                        <p class="text-sm text-text-muted">${issue.description}</p>
                                     </div>
                                     <div class="bg-brand-900/10 p-3 rounded-lg border border-brand-500/10">
-                                        <h5 class="text-[10px] font-bold text-brand-400 uppercase tracking-wider mb-1">How to fix it & Why</h5>
+                                        <h5 class="text-[10px] font-bold text-brand-500 uppercase tracking-wider mb-1">How to fix it & Why</h5>
                                         <p class="text-sm text-brand-100/80">${issue.recommendation || 'Consider refactoring this code block.'}</p>
                                     </div>
                                 </div>
                                 
                                 <div class="flex gap-3">
-                                    ${issue.lineNumber ? `<button onclick="app.highlightLine(${issue.lineNumber})" class="interactive-btn px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-white rounded-lg border border-slate-700 transition">Show in Code</button>` : ''}
-                                    ${issue.fixCode ? `<button onclick="app.showFixUI('${issueId}')" class="interactive-btn px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-xs font-medium text-white rounded-lg shadow-lg shadow-brand-500/20 transition flex items-center gap-1"><i data-lucide="wrench" class="w-3 h-3"></i> Explain More & Fix</button>` : ''}
+                                    ${issue.lineNumber ? `<button onclick="app.highlightLine(${issue.lineNumber})" class="interactive-btn px-4 py-1.5 bg-surface-200 hover:bg-surface-300 text-xs font-medium text-text-main rounded-lg border border-surface-300 transition">Show in Code</button>` : ''}
+                                    ${issue.fixCode ? `<button onclick="app.showFixUI('${issueId}')" class="interactive-btn px-4 py-1.5 bg-brand-500 text-white rounded-lg shadow-lg shadow-brand-500/20 transition flex items-center gap-1"><i data-lucide="wrench" class="w-3 h-3"></i> Explain More & Fix</button>` : ''}
                                 </div>
 
-                                <div id="fix-ui-${issueId}" class="hidden mt-4 bg-navy-950 border border-slate-800 rounded-xl overflow-hidden shadow-inner">
+                                <div id="fix-ui-${issueId}" class="hidden mt-4 bg-primarybg border border-surface-300 rounded-xl overflow-hidden shadow-sm">
                                     <div class="grid grid-cols-1 md:grid-cols-2">
-                                        <div class="border-b md:border-b-0 md:border-r border-slate-800">
-                                            <div class="bg-rose-500/10 px-3 py-1.5 border-b border-rose-500/20 text-[10px] font-bold text-rose-400 tracking-wider flex items-center gap-1"><i data-lucide="x-circle" class="w-3 h-3"></i> VULNERABLE CODE</div>
-                                            <pre class="p-4 text-xs code-font text-slate-400 overflow-x-auto whitespace-pre-wrap"><code>${problemCode.replace(/</g, '&lt;')}</code></pre>
+                                        <div class="border-b md:border-b-0 md:border-r border-surface-300">
+                                            <div class="bg-danger-500/10 px-3 py-1.5 border-b border-danger-500/20 text-[10px] font-bold text-danger-500 tracking-wider flex items-center gap-1"><i data-lucide="x-circle" class="w-3 h-3"></i> VULNERABLE CODE</div>
+                                            <pre class="p-4 text-xs code-font text-text-muted overflow-x-auto whitespace-pre-wrap"><code>${problemCode.replace(/</g, '&lt;')}</code></pre>
                                         </div>
                                         <div>
-                                            <div class="bg-emerald-500/10 px-3 py-1.5 border-b border-emerald-500/20 text-[10px] font-bold text-emerald-400 tracking-wider flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i> SECURE FIX</div>
+                                            <div class="bg-success-500/10 px-3 py-1.5 border-b border-success-500/20 text-[10px] font-bold text-success-500 tracking-wider flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i> SECURE FIX</div>
                                             <pre class="p-4 text-xs code-font text-emerald-300 overflow-x-auto whitespace-pre-wrap"><code>${issue.fixCode ? issue.fixCode.replace(/</g, '&lt;') : ''}</code></pre>
                                         </div>
                                     </div>
-                                    ${issue.fixCode ? `<div class="p-3 bg-slate-900 border-t border-slate-800 text-right"><button onclick="app.applyFixCode('${fixSafeCode}', '${issueId}')" class="interactive-btn px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white rounded-lg shadow-lg shadow-emerald-500/20 transition flex items-center gap-2 ml-auto"><i data-lucide="check" class="w-4 h-4"></i> Apply Secure Fix</button></div>` : ''}
+                                    ${issue.fixCode ? `<div class="p-3 bg-surface-100 border-t border-surface-300 text-right"><button onclick="app.applyFixCode('${fixSafeCode}', '${issueId}')" class="interactive-btn px-4 py-1.5 bg-success-500 text-white rounded-lg shadow-lg shadow-success-500/20 transition flex items-center gap-2 ml-auto"><i data-lucide="check" class="w-4 h-4"></i> Apply Secure Fix</button></div>` : ''}
                                 </div>
                             </div>
                         `;
@@ -1332,15 +1344,15 @@
                     empty.classList.add('hidden');
                     tbody.parentElement.classList.remove('hidden');
                     this.history.forEach(h => {
-                        const scoreColor = h.score >= 80 ? 'text-emerald-400' : h.score >= 60 ? 'text-amber-400' : 'text-rose-400';
+                        const scoreColor = h.score >= 80 ? 'text-success-500' : h.score >= 60 ? 'text-warning-500' : 'text-danger-500';
                         tbody.innerHTML += `
-                            <tr class="hover:bg-slate-800/30 transition">
-                                <td class="p-4 text-sm text-slate-300">${h.date}</td>
-                                <td class="p-4"><span class="bg-slate-800 text-slate-300 px-2 py-1 rounded text-xs font-mono uppercase border border-slate-700">${h.lang}</span></td>
+                            <tr class="hover:bg-surface-200/30 transition">
+                                <td class="p-4 text-sm text-text-muted">${h.date}</td>
+                                <td class="p-4"><span class="bg-surface-200 text-text-muted px-2 py-1 rounded text-xs font-mono uppercase border border-surface-300">${h.lang}</span></td>
                                 <td class="p-4 text-center font-bold ${scoreColor}">${h.score}</td>
-                                <td class="p-4 text-center text-slate-300">${h.bugs}</td>
-                                <td class="p-4 text-center text-slate-300">${h.security}</td>
-                                <td class="p-4"><button onclick="app.loadTemplate('${h.lang}')" class="text-brand-400 hover:text-brand-300 text-sm font-medium transition flex items-center gap-1"><i data-lucide="eye" class="w-4 h-4"></i> View</button></td>
+                                <td class="p-4 text-center text-text-muted">${h.bugs}</td>
+                                <td class="p-4 text-center text-text-muted">${h.security}</td>
+                                <td class="p-4"><button onclick="app.loadTemplate('${h.lang}')" class="text-brand-500 hover:text-brand-600 text-sm font-medium transition flex items-center gap-1"><i data-lucide="eye" class="w-4 h-4"></i> View</button></td>
                             </tr>
                         `;
                     });
@@ -1456,3 +1468,7 @@
     <div id="toast-container"></div>
 </body>
 </html>
+
+
+
+
