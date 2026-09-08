@@ -92,8 +92,9 @@
 </head>
 <body class="antialiased selection:bg-brand-500/20 selection:text-brand-600">
 
-    <div id="auth-view" class="min-h-screen flex items-center justify-center p-6 bg-ivory-200 relative overflow-hidden">
+    <div id="auth-modal" class="hidden opacity-0 fixed inset-0 z-[100] flex items-center justify-center p-6 bg-charcoal-900/40 backdrop-blur-sm transition-opacity duration-300">
         <div class="max-w-md w-full bg-ivory-50 p-10 shadow-float relative z-10">
+        <button onclick="app.closeAuthModal()" class="absolute top-4 right-4 text-charcoal-400 hover:text-charcoal-600"><i data-lucide="x" class="w-6 h-6"></i></button>
             <div class="text-center mb-10">
                 <h1 class="text-3xl font-black tracking-tighter uppercase text-charcoal-600 mb-2">DevSentry <span class="text-brand-500">AI</span></h1>
                 <p class="text-charcoal-400 font-medium">Premium Code Intelligence</p>
@@ -117,7 +118,7 @@
         </div>
     </div>
 
-    <div id="main-app" class="hidden min-h-screen flex-col relative">
+    <div id="main-app" class="flex min-h-screen flex-col relative">
         <header class="sticky top-0 z-50 bg-ivory-200/90 backdrop-blur-xl border-b hairline-border h-20 flex items-center justify-between px-8 lg:px-16 animate-fade-up">
             <div class="flex items-center gap-12">
                 <div class="text-xl font-black tracking-tighter uppercase text-charcoal-600 cursor-pointer" onclick="app.navigate('dashboard')">DevSentry <span class="text-brand-500">AI</span></div>
@@ -130,8 +131,13 @@
                 </nav>
             </div>
             <div class="flex items-center gap-6">
-                <div class="w-8 h-8 rounded-full bg-charcoal-600 text-ivory-50 flex items-center justify-center text-xs font-bold"><span id="nav-profile-name">Me</span></div>
-                <button onclick="app.logout()" class="text-sm font-bold uppercase tracking-widest text-charcoal-400 hover:text-charcoal-600 transition">Logout</button>
+                <div class="w-8 h-8 rounded-full bg-charcoal-600 text-ivory-50 flex items-center justify-center text-xs font-bold"><span id="nav-profile-name">GU</span></div>
+                <div id="auth-actions-logged-out" class="block">
+                    <button onclick="app.openAuthModal()" class="text-sm font-bold uppercase tracking-widest text-brand-500 hover:text-brand-600 transition">Sign In</button>
+                </div>
+                <div id="auth-actions-logged-in" class="hidden">
+                    <button onclick="app.logout()" class="text-sm font-bold uppercase tracking-widest text-charcoal-400 hover:text-charcoal-600 transition">Logout</button>
+                </div>
             </div>
         </header>
 
@@ -319,11 +325,17 @@
                 const user = localStorage.getItem('devsentry_user');
                 if(user) {
                     const data = JSON.parse(user);
-                    document.getElementById('auth-logged-out').classList.add('hidden');
-                    document.getElementById('auth-logged-in').classList.remove('hidden');
-                    document.getElementById('user-name').textContent = data.name;
-                    document.getElementById('dropdown-user-name').textContent = data.name;
-                    document.getElementById('dropdown-user-email').textContent = data.email;
+                    document.getElementById('auth-actions-logged-out').classList.add('hidden');
+                    document.getElementById('auth-actions-logged-in').classList.remove('hidden');
+                    document.getElementById('nav-profile-name').textContent = data.name.substring(0,2).toUpperCase();
+                    document.getElementById('hero-name').textContent = data.name;
+                    this.user = data;
+                } else {
+                    document.getElementById('auth-actions-logged-out').classList.remove('hidden');
+                    document.getElementById('auth-actions-logged-in').classList.add('hidden');
+                    document.getElementById('nav-profile-name').textContent = "GU";
+                    document.getElementById('hero-name').textContent = "Developer";
+                    this.user = null;
                 }
             },
             openAuthModal() { const m = document.getElementById('auth-modal'); if(m) { m.classList.remove('hidden'); setTimeout(() => m.classList.remove('opacity-0'), 10); } },
@@ -393,18 +405,26 @@
                 }
             },
             updateAuthUI() {
-                const data = JSON.parse(localStorage.getItem('devsentry_user'));
-                document.getElementById('auth-logged-out').classList.add('hidden');
-                document.getElementById('auth-logged-in').classList.remove('hidden');
-                document.getElementById('user-name').textContent = data.name;
-                document.getElementById('dropdown-user-name').textContent = data.name;
-                document.getElementById('dropdown-user-email').textContent = data.email;
+                const user = localStorage.getItem('devsentry_user');
+                if(user) {
+                    const data = JSON.parse(user);
+                    document.getElementById('auth-actions-logged-out').classList.add('hidden');
+                    document.getElementById('auth-actions-logged-in').classList.remove('hidden');
+                    document.getElementById('nav-profile-name').textContent = data.name.substring(0,2).toUpperCase();
+                    document.getElementById('hero-name').textContent = data.name;
+                }
             },
             mockSignOut() {
                 localStorage.removeItem('devsentry_user');
-                document.getElementById('auth-logged-in').classList.add('hidden');
-                document.getElementById('auth-logged-out').classList.remove('hidden');
-                this.toggleUserDropdown(false);
+                this.user = null;
+                document.getElementById('auth-actions-logged-in').classList.add('hidden');
+                document.getElementById('auth-actions-logged-out').classList.remove('hidden');
+                document.getElementById('nav-profile-name').textContent = "GU";
+                document.getElementById('hero-name').textContent = "Developer";
+                this.navigate('dashboard');
+                this.showAlert("Signed Out", "You have been successfully signed out.");
+            },
+            toggleUserDropdown(false);
                 this.navigate('dashboard');
                 this.showAlert("Signed Out", "You have been successfully signed out.");
             },
