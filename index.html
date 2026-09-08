@@ -97,7 +97,7 @@
         <button onclick="app.closeAuthModal()" class="absolute top-4 right-4 text-charcoal-400 hover:text-charcoal-600"><i data-lucide="x" class="w-6 h-6"></i></button>
             <div class="text-center mb-10">
                 <h1 class="text-3xl font-black tracking-tighter uppercase text-charcoal-600 mb-2">DevSentry <span class="text-brand-500">AI</span></h1>
-                <p class="text-charcoal-400 font-medium">Premium Code Intelligence</p>
+                <p id="auth-subtitle" class="text-charcoal-400 font-medium">Premium Code Intelligence</p>
             </div>
             <form id="auth-form" class="space-y-6" onsubmit="event.preventDefault(); app.submitAuth(document.getElementById('auth-title').innerText === 'Create Account')">
                 <h2 id="auth-title" class="text-2xl font-bold tracking-tight text-charcoal-600">Sign In</h2>
@@ -197,14 +197,45 @@
                         <div id="audit-empty" class="h-full flex flex-col items-center justify-center text-center opacity-100 transition-opacity duration-500">
                             <h3 class="text-3xl font-extrabold text-charcoal-600 mb-4 tracking-tight">Awaiting Code</h3>
                         </div>
+                        <div id="audit-loading" class="hidden h-full flex flex-col items-center justify-center text-center">
+                            <i data-lucide="loader" class="w-12 h-12 text-brand-500 animate-spin mb-6"></i>
+                            <h3 class="text-2xl font-bold text-charcoal-600 mb-2">Analyzing...</h3>
+                            <p class="text-charcoal-400" id="loading-text">Inspecting code logic and security...</p>
+                        </div>
+                        <div id="audit-error" class="hidden h-full flex flex-col items-center justify-center text-center">
+                            <i data-lucide="alert-triangle" class="w-12 h-12 text-danger-500 mb-6"></i>
+                            <h3 class="text-2xl font-bold text-charcoal-600 mb-2" id="error-title">Analysis Failed</h3>
+                            <p class="text-charcoal-400" id="error-desc">Unable to connect to the backend.</p>
+                        </div>
                     </div>
                 </div>
             </section>
 
             <section id="view-learning" class="view-section pt-20 pb-32">
-                <div class="px-8 lg:px-16 max-w-5xl mx-auto text-center">
-                    <h2 class="text-editorial-h2 text-charcoal-600 mb-20">EVERY BUG IS<br>A LESSON.</h2>
-                    <p class="text-xl text-charcoal-400">Learning statistics automatically generated from your audits.</p>
+                <div class="px-8 lg:px-16 max-w-[1800px] mx-auto text-center">
+                    <h2 class="text-editorial-h2 text-charcoal-600 mb-12">EVERY BUG IS<br>A LESSON.</h2>
+                    <p class="text-2xl font-medium text-charcoal-400 max-w-2xl mx-auto leading-relaxed mb-20">We automatically compile your most frequent mistakes to help you master clean, secure coding.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="bg-ivory-50 shadow-panel p-10 text-left border-t-4 border-danger-500 hover-lift">
+                            <i data-lucide="shield-alert" class="w-10 h-10 text-danger-500 mb-6"></i>
+                            <h3 class="text-xl font-bold text-charcoal-600 mb-4">Security First</h3>
+                            <p class="text-charcoal-400 leading-relaxed mb-6">Understanding injection attacks, memory leaks, and input validation is critical. You've encountered these in 3 recent audits.</p>
+                            <button onclick="app.startSecurityScan()" class="text-sm font-bold uppercase tracking-widest text-brand-500 hover:text-brand-600 transition flex items-center gap-2">Practice Security <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="bg-ivory-50 shadow-panel p-10 text-left border-t-4 border-warning-500 hover-lift">
+                            <i data-lucide="zap" class="w-10 h-10 text-warning-500 mb-6"></i>
+                            <h3 class="text-xl font-bold text-charcoal-600 mb-4">Performance</h3>
+                            <p class="text-charcoal-400 leading-relaxed mb-6">Learn why string concatenation in loops and unoptimized DB queries destroy performance at scale.</p>
+                            <button class="text-sm font-bold uppercase tracking-widest text-brand-500 hover:text-brand-600 transition flex items-center gap-2">View Modules <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="bg-ivory-50 shadow-panel p-10 text-left border-t-4 border-brand-500 hover-lift">
+                            <i data-lucide="code-2" class="w-10 h-10 text-brand-500 mb-6"></i>
+                            <h3 class="text-xl font-bold text-charcoal-600 mb-4">Clean Code</h3>
+                            <p class="text-charcoal-400 leading-relaxed mb-6">Master SOLID principles, design patterns, and maintainable architecture through AI-guided refactoring.</p>
+                            <button class="text-sm font-bold uppercase tracking-widest text-brand-500 hover:text-brand-600 transition flex items-center gap-2">Read Guide <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -216,11 +247,46 @@
             </section>
 
             <section id="view-reports" class="view-section pt-20 pb-32">
-                <div class="px-8 lg:px-16 max-w-5xl mx-auto">
+                <div class="px-8 lg:px-16 max-w-[1800px] mx-auto">
                     <h2 class="text-editorial-h2 text-charcoal-600 mb-16">ANALYSIS<br>REPORTS.</h2>
-                    <div class="bg-ivory-50 shadow-panel p-12">
-                        <h3 class="text-3xl font-extrabold text-charcoal-600 tracking-tight mb-8">Executive Summary</h3>
-                        <p class="text-lg text-charcoal-500">Reports data.</p>
+                    
+                    <div class="flex flex-col lg:flex-row gap-12">
+                        <div class="lg:w-1/3">
+                            <div class="bg-ivory-50 shadow-panel p-10 mb-8 border-l-4 border-charcoal-600">
+                                <h3 class="text-sm font-bold uppercase tracking-widest text-charcoal-400 mb-6">Lifetime Audits</h3>
+                                <p class="text-5xl font-black text-charcoal-600 tracking-tighter" id="rep-total-audits">0 times</p>
+                            </div>
+                            <div class="bg-ivory-50 shadow-panel p-10 mb-8 border-l-4 border-brand-500">
+                                <h3 class="text-sm font-bold uppercase tracking-widest text-charcoal-400 mb-6">Average Score</h3>
+                                <p class="text-5xl font-black text-brand-500 tracking-tighter" id="rep-avg-score">0 / 100</p>
+                            </div>
+                            <div class="bg-ivory-50 shadow-panel p-10 border-l-4 border-success-500">
+                                <h3 class="text-sm font-bold uppercase tracking-widest text-charcoal-400 mb-6">Top Language</h3>
+                                <p class="text-5xl font-black text-success-500 tracking-tighter" id="rep-top-lang">-</p>
+                            </div>
+                        </div>
+                        
+                        <div class="lg:w-2/3">
+                            <div class="bg-ivory-50 shadow-panel p-12 h-full">
+                                <div class="flex justify-between items-center mb-10">
+                                    <h3 class="text-3xl font-extrabold text-charcoal-600 tracking-tight">Executive Summary</h3>
+                                    <button onclick="app.downloadCurrentReport()" class="interactive-btn dark-ripple bg-charcoal-600 text-ivory-50 px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-charcoal-900 transition flex items-center gap-2">
+                                        <i data-lucide="download-cloud" class="w-4 h-4"></i> Export Latest
+                                    </button>
+                                </div>
+                                <p class="text-xl text-charcoal-400 leading-relaxed mb-8">
+                                    Your code quality is consistently improving. Over the last several audits, you've reduced the frequency of critical security vulnerabilities (such as SQL Injection) and improved overall time complexity.
+                                </p>
+                                <div class="space-y-6 pt-8 border-t hairline-border">
+                                    <h4 class="text-sm font-bold uppercase tracking-widest text-charcoal-600">Key Recommendations:</h4>
+                                    <ul class="space-y-4 text-charcoal-500 text-lg">
+                                        <li class="flex items-start gap-4"><i data-lucide="check" class="w-6 h-6 text-brand-500 shrink-0"></i> <span>Migrate remaining raw queries to <code class="bg-ivory-200 px-2 py-1 rounded-sm text-sm">PreparedStatement</code>.</span></li>
+                                        <li class="flex items-start gap-4"><i data-lucide="check" class="w-6 h-6 text-brand-500 shrink-0"></i> <span>Refactor nested <code class="bg-ivory-200 px-2 py-1 rounded-sm text-sm">for</code> loops where O(1) hash lookups are possible.</span></li>
+                                        <li class="flex items-start gap-4"><i data-lucide="check" class="w-6 h-6 text-brand-500 shrink-0"></i> <span>Adopt modern C++ smart pointers (<code class="bg-ivory-200 px-2 py-1 rounded-sm text-sm">std::unique_ptr</code>) to prevent leaks.</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -230,7 +296,6 @@
 
     <div id="toast-container"></div>
     <script>
-<script>
         const API_BASE_URL = 'http://localhost:8080/api';
         
         const app = {
@@ -390,7 +455,7 @@
                 const btn = document.getElementById('btn-signin');
                 const toggle = document.getElementById('auth-toggle');
                 
-                if (title.innerText === "Sign In") {
+                if (subtitle) { subtitle.innerText = title.innerText === 'Sign In' ? 'Join DevSentry AI to start auditing code.' : 'Premium Code Intelligence'; } if (title.innerText === "Sign In") {
                     title.innerText = "Create Account";
                     subtitle.innerText = "Join DevSentry AI to start auditing code.";
                     btn.innerText = "Register";
@@ -414,17 +479,13 @@
                     document.getElementById('hero-name').textContent = data.name;
                 }
             },
-            mockSignOut() {
+            logout() {
                 localStorage.removeItem('devsentry_user');
                 this.user = null;
                 document.getElementById('auth-actions-logged-in').classList.add('hidden');
                 document.getElementById('auth-actions-logged-out').classList.remove('hidden');
                 document.getElementById('nav-profile-name').textContent = "GU";
                 document.getElementById('hero-name').textContent = "Developer";
-                this.navigate('dashboard');
-                this.showAlert("Signed Out", "You have been successfully signed out.");
-            },
-            toggleUserDropdown(false);
                 this.navigate('dashboard');
                 this.showAlert("Signed Out", "You have been successfully signed out.");
             },
@@ -509,7 +570,7 @@
                 });
             },
             changeLanguage(val) {
-                const select = document.getElementById('global-lang-select');
+                const select = document.getElementById('language-select');
                 if(select) select.value = val;
                 if (this.editor) monaco.editor.setModelLanguage(this.editor.getModel(), val);
             },
@@ -559,9 +620,7 @@
                 }
             },
             applyFixCode(codeToApply, issueId) {
-                if (!this.editor) return;
-                this.editor.setValue(codeToApply);
-                this.showAlert("Fix Applied", "The AI fix has been applied to your code editor.", "check-circle", "emerald");
+                this.showAlert("Review Fix", "For safety, please copy the suggested fix and paste it into the exact line.", "alert-circle", "brand");
                 if(issueId) this.showFixUI(issueId);
             },
 
@@ -573,11 +632,11 @@
 
             // AUDIT LOGIC
             showEmpty() {
-                ['state-loading', 'state-error', 'state-results'].forEach(id => {
+                ['audit-loading', 'audit-error', 'audit-results'].forEach(id => {
                     const el = document.getElementById(id);
                     if(el) el.classList.add('hidden');
                 });
-                const empty = document.getElementById('state-empty');
+                const empty = document.getElementById('audit-empty');
                 if(empty) empty.classList.remove('hidden');
             },
 
@@ -591,12 +650,12 @@
                     return; 
                 }
 
-                const langSelect = document.getElementById('global-lang-select');
+                const langSelect = document.getElementById('language-select');
                 const lang = langSelect ? langSelect.value : 'java';
 
                 this.isAuditing = true;
-                ['state-empty', 'state-error', 'state-results'].forEach(id => document.getElementById(id).classList.add('hidden'));
-                document.getElementById('state-loading').classList.remove('hidden');
+                ['audit-empty', 'audit-error', 'audit-results'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); });
+                document.getElementById('audit-loading').classList.remove('hidden');
                 
                 const btnRun = document.getElementById('btn-run-audit');
                 const btnRunText = document.getElementById('btn-run-text');
@@ -635,11 +694,11 @@
                             if (apiErr.name === 'TypeError') userMsg = "Unable to connect to DevSentry backend. Please make sure the server is running.";
                             
                             // Show error state with message
-                            document.getElementById('state-loading').classList.add('hidden');
-                            document.getElementById('state-error').classList.remove('hidden');
-                            const errTitle = document.querySelector('#state-error h3');
+                            document.getElementById('audit-loading').classList.add('hidden');
+                            document.getElementById('audit-error').classList.remove('hidden');
+                            const errTitle = document.querySelector('#audit-error h3');
                             if(errTitle) errTitle.textContent = "Backend Connection Failed";
-                            const errDesc = document.querySelector('#state-error p');
+                            const errDesc = document.querySelector('#audit-error p');
                             if(errDesc) errDesc.textContent = userMsg;
                             
                             this.isAuditing = false;
@@ -652,8 +711,8 @@
                     this.renderResults(data, code, forceMock);
                     this.saveAuditToHistory(data, lang, code);
                 } catch (err) {
-                    document.getElementById('state-loading').classList.add('hidden');
-                    document.getElementById('state-error').classList.remove('hidden');
+                    document.getElementById('audit-loading').classList.add('hidden');
+                    document.getElementById('audit-error').classList.remove('hidden');
                 } finally {
                     this.isAuditing = false;
                     if(btnRun) btnRun.disabled = false;
@@ -689,7 +748,7 @@
             },
 
             renderResults(data, originalCode, isDemo) {
-        document.getElementById('audit-empty').classList.add('hidden');
+        document.getElementById('audit-empty').classList.add('hidden'); document.getElementById('audit-loading').classList.add('hidden'); document.getElementById('audit-error').classList.add('hidden');
         document.getElementById('audit-results').classList.remove('hidden');
         document.getElementById('audit-results').style.opacity = '1';
         
@@ -718,6 +777,59 @@
         if(descEl) descEl.textContent = res.summary || "We analyzed your code architecture and found areas for refinement.";
         
         this.renderIssueList('issue-list', res.issues || [], "No issues found! Exceptional work.");
+        
+        const container = document.getElementById('issue-list');
+        if(!container) return;
+
+        // Render Complexity
+        if (res.complexity) {
+            container.innerHTML += `
+                <div class="bg-ivory-50 shadow-panel hover-lift border-l-4 border-brand-500 p-6 mt-6 animate-fade-up">
+                    <h4 class="text-lg font-bold text-charcoal-600 mb-4 flex items-center gap-2"><i data-lucide="cpu" class="w-5 h-5 text-brand-500"></i> Complexity Analysis</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-ivory-200 p-4 rounded-sm">
+                            <p class="text-xs font-bold uppercase tracking-widest text-charcoal-400 mb-1">Time Complexity</p>
+                            <p class="text-xl font-black text-brand-500 mb-2">${res.complexity.timeComplexity || res.complexity.time || 'O(1)'}</p>
+                            <p class="text-sm text-charcoal-500">${res.complexity.timeExplanation || ''}</p>
+                        </div>
+                        <div class="bg-ivory-200 p-4 rounded-sm">
+                            <p class="text-xs font-bold uppercase tracking-widest text-charcoal-400 mb-1">Space Complexity</p>
+                            <p class="text-xl font-black text-brand-500 mb-2">${res.complexity.spaceComplexity || res.complexity.space || 'O(1)'}</p>
+                            <p class="text-sm text-charcoal-500">${res.complexity.spaceExplanation || ''}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render Recommendations
+        if (res.recommendations && res.recommendations.length > 0) {
+            let recHtml = res.recommendations.map(r => `<li class="flex items-start gap-3 text-sm text-charcoal-600"><i data-lucide="lightbulb" class="w-4 h-4 text-warning-500 mt-0.5 shrink-0"></i> <span>${r}</span></li>`).join('');
+            container.innerHTML += `
+                <div class="bg-ivory-50 shadow-panel hover-lift border-l-4 border-warning-500 p-6 mt-6 animate-fade-up">
+                    <h4 class="text-lg font-bold text-charcoal-600 mb-4 flex items-center gap-2"><i data-lucide="list-checks" class="w-5 h-5 text-warning-500"></i> Recommendations</h4>
+                    <ul class="space-y-3">${recHtml}</ul>
+                </div>
+            `;
+        }
+
+        // Render Test Cases
+        if (res.testCases && res.testCases.length > 0) {
+            let testHtml = res.testCases.map(t => `
+                <div class="bg-charcoal-900 text-ivory-50 p-4 rounded-sm font-mono text-xs shadow-panel mb-3">
+                    <p><span class="text-brand-500 font-bold">Purpose:</span> ${t.purpose}</p>
+                    <p><span class="text-warning-500 font-bold">Input:</span> ${t.input}</p>
+                    <p><span class="text-success-500 font-bold">Expected Output:</span> ${t.expected}</p>
+                </div>
+            `).join('');
+            container.innerHTML += `
+                <div class="bg-ivory-50 shadow-panel hover-lift border-l-4 border-success-500 p-6 mt-6 animate-fade-up">
+                    <h4 class="text-lg font-bold text-charcoal-600 mb-4 flex items-center gap-2"><i data-lucide="test-tube" class="w-5 h-5 text-success-500"></i> Generated Test Cases</h4>
+                    ${testHtml}
+                </div>
+            `;
+        }
+
         lucide.createIcons();
     },
     
@@ -869,11 +981,15 @@
                 const scoreColor = h.score >= 80 ? 'text-success-500' : h.score >= 60 ? 'text-warning-500' : 'text-danger-500';
                 tbody.innerHTML += `
                     <div class="flex flex-col md:flex-row md:items-center justify-between p-6 bg-ivory-50 shadow-panel hover-lift animate-fade-up border-l-4 border-charcoal-400 mb-4" style="animation-delay: ${idx * 50}ms">
-                        <div class="w-full md:w-1/4 text-sm font-bold text-charcoal-600 mb-2 md:mb-0">${h.date}</div>
-                        <div class="w-full md:w-1/4 mb-2 md:mb-0"><span class="bg-charcoal-600 text-ivory-50 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">${h.lang}</span></div>
-                        <div class="w-full md:w-1/4 text-sm font-medium text-charcoal-500 mb-4 md:mb-0">${h.bugs} Bugs / ${h.security} Security</div>
-                        <div class="w-full md:w-1/4 md:text-right">
-                            <span class="text-4xl font-black tracking-tighter ${scoreColor}">${h.score}</span>
+                        <div class="w-full md:w-1/5 text-sm font-bold text-charcoal-600 mb-2 md:mb-0">${h.date}</div>
+                        <div class="w-full md:w-1/5 mb-2 md:mb-0"><span class="bg-charcoal-600 text-ivory-50 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">${h.lang}</span></div>
+                        <div class="w-full md:w-1/5 text-sm font-medium text-charcoal-500 mb-4 md:mb-0">${h.bugs} Bugs / ${h.security} Security</div>
+                        <div class="w-full md:w-1/5 md:text-right">
+                            <span class="text-4xl font-black tracking-tighter ${scoreColor} mr-4">${h.score}</span>
+                        </div>
+                        <div class="w-full md:w-1/5 md:text-right flex items-center justify-end gap-3 mt-4 md:mt-0">
+                            <button onclick="app.loadAudit(${h.id})" class="text-brand-500 hover:text-brand-600 transition" title="View Details"><i data-lucide="eye" class="w-5 h-5"></i></button>
+                            <button onclick="app.deleteAudit(${h.id})" class="text-danger-400 hover:text-danger-600 transition" title="Delete Audit"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                         </div>
                     </div>
                 `;
@@ -881,7 +997,58 @@
         }
     },
     
-    async updateDashboardStats() {
+    
+            async loadAudit(id) {
+                try {
+                    let record = null;
+                    if (this.user && this.user.token) {
+                        const response = await fetch(`${API_BASE_URL}/audits/${id}`, {
+                            headers: { 'Authorization': 'Bearer ' + this.user.token }
+                        });
+                        if (response.ok) {
+                            record = await response.json();
+                        }
+                    } else {
+                        // Fallback
+                        record = this.history.find(h => h.id === id);
+                    }
+                    if(record) {
+                        this.navigate('audit');
+                        let parsed = null;
+                        try { parsed = JSON.parse(record.rawResultJson); } catch(e) {}
+                        
+                        this.currentAuditData = parsed || record;
+                        if(this.editor && record.code) this.editor.setValue(record.code);
+                        this.renderResults(this.currentAuditData, record.code || '', false);
+                        this.showAlert("Audit Loaded", "Loaded historical audit.", "check-circle", "emerald");
+                    }
+                } catch(e) {
+                    this.showAlert("Error", "Failed to load audit.", "alert-triangle", "rose");
+                }
+            },
+            async deleteAudit(id) {
+                if(!confirm("Are you sure you want to delete this audit?")) return;
+                try {
+                    if (this.user && this.user.token) {
+                        const response = await fetch(`${API_BASE_URL}/audits/${id}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': 'Bearer ' + this.user.token }
+                        });
+                        if (!response.ok) throw new Error("Failed to delete from server.");
+                    }
+                    // Remove from local memory
+                    this.history = this.history.filter(h => h.id !== id);
+                    localStorage.setItem('devsentry_history', JSON.stringify(this.history));
+                    this.renderHistory();
+                    this.updateDashboardStats();
+                    this.renderReportsStats();
+                    this.showAlert("Deleted", "Audit successfully removed.", "trash", "brand");
+                } catch(e) {
+                    this.showAlert("Error", "Failed to delete audit.", "alert-triangle", "rose");
+                }
+            },
+    
+            async updateDashboardStats() {
                 try {
                     if (this.user && this.user.token) {
                         const response = await fetch(`${API_BASE_URL}/audits/stats`, {
