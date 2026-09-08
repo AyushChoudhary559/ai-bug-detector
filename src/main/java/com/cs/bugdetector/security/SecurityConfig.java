@@ -31,7 +31,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/h2-console/**", "/api/audit/**", "/api/v1/detector/**", "/api/audits/**", "/api/dashboard/**", "/api/reports/**").permitAll()
+                .requestMatchers("/api/auth/**", "/h2-console/**", "/api/audit/**", "/api/v1/detector/**", "/api/audits/**", "/api/dashboard/**", "/api/reports/**", "/api/health/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

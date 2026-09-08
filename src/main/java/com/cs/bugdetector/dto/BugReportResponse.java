@@ -23,6 +23,7 @@ public class BugReportResponse {
     private String qualityScore;
     private String summary;
     private String status;
+    private String compileStatus;
     private int totalBugsFound;
 
     @Builder.Default
@@ -83,6 +84,7 @@ public class BugReportResponse {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Issue {
         private Integer lineNumber;
+        private String source;
         private String issueType;
         private String severity;
         private String title;

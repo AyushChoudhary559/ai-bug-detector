@@ -8,6 +8,7 @@ import com.cs.bugdetector.repository.AuditRecordRepository;
 import com.cs.bugdetector.repository.UserRepository;
 import com.cs.bugdetector.service.AiCodeAnalysisService;
 import com.cs.bugdetector.service.MockStaticAnalysisService;
+import com.cs.bugdetector.service.AnalysisPipeline;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class AuditController {
 
-    private final AiCodeAnalysisService aiService;
-    private final MockStaticAnalysisService mockService;
+    private final AnalysisPipeline pipeline;
     private final AuditRecordRepository auditRecordRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -43,17 +43,7 @@ public class AuditController {
             user = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
         }
 
-        BugReportResponse response;
-        try {
-            // Attempt real AI analysis
-            response = aiService.analyzeCode(request);
-            if (response == null || response.getIssues() == null) {
-                throw new IllegalStateException("AI response returned empty result");
-            }
-        } catch (Exception e) {
-            log.info("AI service unavailable or not configured. Using static analysis engine. Details: {}", e.getMessage());
-            response = mockService.analyzeMock(request);
-        }
+        BugReportResponse response = pipeline.runPipeline(request);
 
         try {
             int score = response.getScore() != null ? response.getScore() : 80;

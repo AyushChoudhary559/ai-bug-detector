@@ -173,7 +173,15 @@
                     <div class="xl:w-7/12 flex flex-col h-[80vh]">
                         <h2 class="text-editorial-h2 text-charcoal-600 mb-8">SHOW ME<br>YOUR CODE.</h2>
                         <div class="flex items-center justify-between mb-6">
-                            <select id="language-select" class="bg-transparent border-b-2 border-charcoal-600 py-2 pr-8 text-lg font-bold text-charcoal-600 outline-none"><option value="java">Java</option><option value="cpp">C++</option></select>
+                            <select id="language-select" class="bg-transparent border-b-2 border-charcoal-600 py-2 pr-8 text-lg font-bold text-charcoal-600 outline-none">
+        <option value="java">Java</option>
+        <option value="c">C</option>
+        <option value="cpp">C++</option>
+        <option value="python">Python</option>
+        <option value="javascript">JavaScript</option>
+        <option value="html">HTML</option>
+        <option value="sql">SQL</option>
+    </select>
                             <div class="flex gap-4">
                                 <button onclick="app.clearEditor()" class="text-sm font-bold uppercase tracking-widest text-charcoal-400">Clear</button>
                                 <button id="btn-run-audit" onclick="app.runAudit()" class="interactive-btn dark-ripple bg-charcoal-600 text-ivory-50 px-6 py-3 text-sm font-bold uppercase tracking-widest"><span id="btn-run-text">Run Audit</span></button>
@@ -183,6 +191,17 @@
                     </div>
                     <div class="xl:w-5/12 h-[80vh] flex flex-col pt-24">
                         <div id="audit-results" class="hidden h-full flex flex-col opacity-0 transition-opacity duration-700">
+        <div class="flex gap-4 mb-8 border-b hairline-border pb-4" id="analysis-breakdown">
+            <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-charcoal-400">
+                <i data-lucide="check-circle" class="w-4 h-4 text-success-500" id="check-compiler"></i> Compiler
+            </div>
+            <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-charcoal-400">
+                <i data-lucide="check-circle" class="w-4 h-4 text-success-500" id="check-static"></i> Static Analysis
+            </div>
+            <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-charcoal-400">
+                <i data-lucide="check-circle" class="w-4 h-4 text-success-500" id="check-ai"></i> AI Engine
+            </div>
+        </div>
                             <div class="mb-16">
                                 <p class="text-xs font-bold uppercase tracking-widest text-charcoal-400 mb-6">Score</p>
                                 <span id="res-score" class="text-8xl font-black text-brand-500 tracking-tighter leading-none">0</span><span class="text-2xl font-bold text-charcoal-400">/100</span>
@@ -773,6 +792,14 @@
         const titleEl = document.getElementById('res-summary-title');
         if(titleEl) titleEl.textContent = score >= 80 ? "Excellent Quality" : (score >= 60 ? "Needs Improvement" : "Critical Attention Required");
         
+        // Update Breakdown Checks
+        const cc = document.getElementById('check-compiler');
+        if (cc) {
+            cc.className = res.compileStatus === 'PASSED' ? 'w-4 h-4 text-success-500' : (res.compileStatus === 'FAILED' ? 'w-4 h-4 text-danger-500' : 'w-4 h-4 text-warning-500');
+            if (res.compileStatus && res.compileStatus.includes('UNAVAILABLE')) cc.className = 'w-4 h-4 text-charcoal-300';
+        }
+        
+        
         const descEl = document.getElementById('res-summary-text');
         if(descEl) descEl.textContent = res.summary || "We analyzed your code architecture and found areas for refinement.";
         
@@ -857,7 +884,7 @@
                                 <i data-lucide="${icon}" class="w-5 h-5"></i>
                             </div>
                             <div>
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-charcoal-400">${issue.severity}</p>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-charcoal-400 flex items-center gap-2"><span class="bg-charcoal-200 px-1 py-0.5 rounded">${issue.source || 'AI'}</span> ${issue.severity}</p>
                                 <h4 class="text-lg font-bold text-charcoal-600 leading-tight">${issue.title || 'Issue Detected'}</h4>
                             </div>
                         </div>
