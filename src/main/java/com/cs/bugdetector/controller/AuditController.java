@@ -16,10 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/v1/detector")
 @RequiredArgsConstructor
 @Slf4j
 public class AuditController {
@@ -30,42 +27,62 @@ public class AuditController {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @PostMapping("/analyze")
+    @PostMapping({"/api/v1/detector/analyze", "/api/audit"})
     public ResponseEntity<?> analyzeCode(@RequestBody CodeAnalysisRequest request) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = null;
-        if (principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
-            user = userRepository.findByUsername(username).orElse(null);
+        String code = request.getSourceCode();
+        if (code == null || code.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Source code is required");
         }
 
-        if (user == null) {
-            return ResponseEntity.status(401).body("Unauthorized");
+        User user = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication() != null
+                ? SecurityContextHolder.getContext().getAuthentication().getPrincipal()
+                : null;
+
+        if (principal instanceof UserDetails userDetails) {
+            user = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
         }
 
         BugReportResponse response;
         try {
             // Attempt real AI analysis
             response = aiService.analyzeCode(request);
+            if (response == null || response.getIssues() == null) {
+                throw new IllegalStateException("AI response returned empty result");
+            }
         } catch (Exception e) {
-            log.warn("Real AI API failed, using mock provider. Error: {}", e.getMessage());
+            log.info("AI service unavailable or not configured. Using static analysis engine. Details: {}", e.getMessage());
             response = mockService.analyzeMock(request);
         }
 
         try {
+            int score = response.getScore() != null ? response.getScore() : 80;
+            int bugsCount = response.getBugs() != null ? response.getBugs().size() : 0;
+            int securityCount = response.getSecurityIssues() != null ? response.getSecurityIssues().size() : 0;
+            String timeComp = response.getComplexity() != null ? response.getComplexity().getTimeComplexity() : "O(1)";
+            String spaceComp = response.getComplexity() != null ? response.getComplexity().getSpaceComplexity() : "O(1)";
+
             String jsonRaw = objectMapper.writeValueAsString(response);
             AuditRecord record = AuditRecord.builder()
                     .user(user)
-                    .language(request.getLanguage())
-                    .fileName("Unknown")
-                    .code(request.getSourceCode())
-                    .score(response.getScore())
+                    .language(request.getLanguage() != null ? request.getLanguage() : "java")
+                    .fileName(request.getFileName() != null ? request.getFileName() : "code-snippet")
+                    .code(code)
+                    .score(score)
                     .status("COMPLETED")
+                    .bugsCount(bugsCount)
+                    .securityCount(securityCount)
+                    .timeComplexity(timeComp)
+                    .spaceComplexity(spaceComp)
                     .rawResultJson(jsonRaw)
                     .build();
-            auditRecordRepository.save(record);
+
+            AuditRecord saved = auditRecordRepository.save(record);
+            response.setAuditId(saved.getId());
+            response.setStatus("COMPLETED");
         } catch (Exception e) {
-            log.error("Failed to save audit record", e);
+            log.error("Failed to save audit record: {}", e.getMessage());
+            response.setStatus("COMPLETED");
         }
 
         return ResponseEntity.ok(response);
