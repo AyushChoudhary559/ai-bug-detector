@@ -577,6 +577,8 @@
     <button onclick="window.scrollTo({top:0, behavior:'smooth'})" id="fab-top" class="fixed bottom-6 right-6 p-3 bg-brand-600 hover:bg-brand-500 text-white rounded-full shadow-xl transform scale-0 transition-all z-40 focus:outline-none"><i data-lucide="arrow-up" class="w-5 h-5"></i></button>
 
     <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+        
         const app = {
             editor: null,
             currentView: 'dashboard',
@@ -687,7 +689,7 @@
                 if(btn) btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>`;
                 lucide.createIcons();
                 
-                const url = isRegister ? 'http://localhost:8080/api/auth/register' : 'http://localhost:8080/api/auth/login';
+                const url = isRegister ? `${API_BASE_URL}/auth/register` : `${API_BASE_URL}/auth/login`;
                 const body = isRegister ? {username, email, password} : {username, password};
 
                 try {
@@ -698,8 +700,10 @@
                     });
                     
                     if (!response.ok) {
-                        const errText = await response.text();
-                        throw new Error(errText || "Authentication failed");
+                        let errText = "Authentication failed.";
+                        if (response.status === 401) errText = "Invalid credentials. Please try again.";
+                        if (response.status === 400) errText = "Bad request. Username may be taken.";
+                        throw new Error(errText);
                     }
                     
                     const data = await response.json();
@@ -711,9 +715,12 @@
                     
                     this.closeAuthModal();
                     this.updateAuthUI();
+                    this.loadHistory(); // Refresh history with real backend data upon login
                     
                 } catch (err) {
-                    alert("Auth Error: " + err.message);
+                    let msg = err.message;
+                    if (err.name === 'TypeError') msg = "Unable to connect to DevSentry backend. Please make sure the server is running.";
+                    alert("Auth Error: " + msg);
                     if(btn) btn.innerHTML = isRegister ? `Create Account` : `Sign In`;
                 }
             },
@@ -917,17 +924,35 @@
                             if (this.user && this.user.token) {
                                 headers['Authorization'] = 'Bearer ' + this.user.token;
                             }
-                            const response = await fetch('http://localhost:8080/api/v1/detector/analyze', {
+                            const response = await fetch(`${API_BASE_URL}/v1/detector/analyze`, {
                                 method: 'POST', headers: headers,
                                 body: JSON.stringify({ language: lang, sourceCode: code })
                             });
-                            if (!response.ok) throw new Error("HTTP " + response.status);
+                            
+                            if (!response.ok) {
+                                let errMsg = "Audit failed due to server error.";
+                                if(response.status === 401) errMsg = "Unauthorized. Please login again.";
+                                if(response.status === 403) errMsg = "Forbidden. Invalid token.";
+                                throw new Error(errMsg);
+                            }
                             data = await response.json();
                         } catch (apiErr) { 
-                            console.warn("Real API failed, falling back to mock.", apiErr);
-                            // Auto fallback for seamless demo experience
-                            data = this.generateMockData(lang, code);
-                            forceMock = true; // Mark as demo
+                            console.error("Backend API Error:", apiErr);
+                            let userMsg = apiErr.message;
+                            if (apiErr.name === 'TypeError') userMsg = "Unable to connect to DevSentry backend. Please make sure the server is running.";
+                            
+                            // Show error state with message
+                            document.getElementById('state-loading').classList.add('hidden');
+                            document.getElementById('state-error').classList.remove('hidden');
+                            const errTitle = document.querySelector('#state-error h3');
+                            if(errTitle) errTitle.textContent = "Backend Connection Failed";
+                            const errDesc = document.querySelector('#state-error p');
+                            if(errDesc) errDesc.textContent = userMsg;
+                            
+                            this.isAuditing = false;
+                            if(btnRun) btnRun.disabled = false;
+                            if(btnRunText) btnRunText.textContent = "Run AI Audit";
+                            return; // Stop execution
                         } 
                     }
                     this.currentAuditData = data;
@@ -1128,12 +1153,50 @@
             },
 
             // HISTORY & REPORTS
-            loadHistory() {
-                const h = localStorage.getItem('devsentry_history');
-                if(h) this.history = JSON.parse(h);
+            async loadHistory() {
+                try {
+                    if (this.user && this.user.token) {
+                        const response = await fetch(`${API_BASE_URL}/audits`, {
+                            headers: { 'Authorization': 'Bearer ' + this.user.token }
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.history = data.map(record => {
+                                let parsed = {};
+                                try { parsed = JSON.parse(record.rawResultJson); } catch(e) {}
+                                return {
+                                    id: record.id,
+                                    date: new Date(record.createdAt).toLocaleString(),
+                                    lang: record.language,
+                                    score: record.score,
+                                    bugs: parsed.issues?.filter(i => i.issueType !== 'SECURITY' && i.issueType !== 'PERFORMANCE').length || 0,
+                                    security: parsed.issues?.filter(i => i.issueType === 'SECURITY').length || 0
+                                };
+                            });
+                        } else {
+                            if(response.status === 401) {
+                                // Token expired or invalid
+                                this.logout();
+                            }
+                        }
+                    } else {
+                        // Fallback for unauthenticated mock usage
+                        const h = localStorage.getItem('devsentry_history');
+                        if(h) this.history = JSON.parse(h);
+                    }
+                } catch(e) {
+                    console.error("Failed to load history from backend", e);
+                    const h = localStorage.getItem('devsentry_history');
+                    if(h) this.history = JSON.parse(h);
+                }
                 this.updateDashboardStats();
             },
             saveAuditToHistory(data, lang, code) {
+                if (this.user && this.user.token) {
+                    // Backend already saved it. Just reload.
+                    this.loadHistory();
+                    return;
+                }
                 const issues = data.issues || [];
                 const entry = {
                     id: Date.now(),
@@ -1183,7 +1246,26 @@
                 }
                 lucide.createIcons();
             },
-            updateDashboardStats() {
+            async updateDashboardStats() {
+                try {
+                    if (this.user && this.user.token) {
+                        const response = await fetch(`${API_BASE_URL}/audits/stats`, {
+                            headers: { 'Authorization': 'Bearer ' + this.user.token }
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            if(document.getElementById('stat-total')) document.getElementById('stat-total').textContent = data.totalAudits || 0;
+                            if(document.getElementById('stat-avg')) document.getElementById('stat-avg').textContent = data.averageScore || 0;
+                            if(document.getElementById('stat-bugs')) document.getElementById('stat-bugs').textContent = data.bugsFound || 0;
+                            if(document.getElementById('stat-sec')) document.getElementById('stat-sec').textContent = data.securityIssues || 0;
+                            return;
+                        }
+                    }
+                } catch(e) {
+                    console.warn("Failed to load stats from backend, falling back to local computation");
+                }
+                
+                // Fallback if not logged in or backend fails
                 const total = this.history.length;
                 let bugs = 0, sec = 0, scoreSum = 0;
                 this.history.forEach(h => { bugs += h.bugs; sec += h.security; scoreSum += h.score; });
