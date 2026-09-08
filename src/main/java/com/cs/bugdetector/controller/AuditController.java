@@ -6,7 +6,6 @@ import com.cs.bugdetector.entity.AuditRecord;
 import com.cs.bugdetector.entity.User;
 import com.cs.bugdetector.repository.AuditRecordRepository;
 import com.cs.bugdetector.repository.UserRepository;
-import com.cs.bugdetector.service.AiCodeAnalysisService;
 import com.cs.bugdetector.service.AnalysisPipeline;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -45,11 +44,11 @@ public class AuditController {
         BugReportResponse response = pipeline.runPipeline(request);
 
         try {
-            int score = response.getScore() != null ? response.getScore() : 80;
+            int score = response.getScore() != null ? response.getScore() : 0;
             int bugsCount = response.getBugs() != null ? response.getBugs().size() : 0;
             int securityCount = response.getSecurityIssues() != null ? response.getSecurityIssues().size() : 0;
-            String timeComp = response.getComplexity() != null ? response.getComplexity().getTimeComplexity() : "O(1)";
-            String spaceComp = response.getComplexity() != null ? response.getComplexity().getSpaceComplexity() : "O(1)";
+            String timeComp = response.getComplexity() != null ? response.getComplexity().getTimeComplexity() : null;
+            String spaceComp = response.getComplexity() != null ? response.getComplexity().getSpaceComplexity() : null;
 
             String jsonRaw = objectMapper.writeValueAsString(response);
             AuditRecord record = AuditRecord.builder()
