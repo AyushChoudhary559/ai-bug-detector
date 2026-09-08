@@ -1,4 +1,4 @@
-﻿# Compiled Java class files
+# Compiled Java class files
 *.class
 
 # Log files
@@ -53,3 +53,13 @@ Desktop.ini
 apache-maven-*/
 jdk-*/
 data/
+
+# Scratch/helper scripts
+*.py
+test_python.ps1
+audit_results_check.txt
+audit_section.html
+audit_section_live.html
+learning_section.html
+render_issue_list.txt
+run_audit.txt
