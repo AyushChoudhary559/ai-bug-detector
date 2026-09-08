@@ -31,26 +31,59 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
     <!-- Custom Styles -->
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #e2e8f0; overflow-x: hidden; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #e2e8f0; overflow-x: hidden; scroll-behavior: smooth; }
         .code-font { font-family: 'Fira Code', monospace; }
+        
+        /* Premium Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; border: 2px solid #0f172a; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
         
+        /* Navigation & Tabs */
+        .nav-link { transition: all 0.2s ease; border-right: 3px solid transparent; }
+        .nav-link:hover { background-color: rgba(99, 102, 241, 0.05); color: #a5b4fc; }
         .nav-link.active { background-color: rgba(99, 102, 241, 0.1); color: #818cf8; border-right: 3px solid #6366f1; }
         .tab-btn.active { border-bottom: 2px solid #818cf8; color: #818cf8; }
         
-        .view-section { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
-        .view-section.active { display: block; opacity: 1; }
+        /* Views */
+        .view-section { display: none; opacity: 0; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(10px); }
+        .view-section.active { display: block; opacity: 1; transform: translateY(0); }
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out forwards; }
 
-        .glass-panel { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .glow-text { text-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
-        html { scroll-behavior: smooth; }
-
-        .monaco-highlight-line { background-color: rgba(225, 29, 72, 0.2); border-left: 4px solid #e11d48; }
+        /* Glassmorphism & Elevation */
+        .glass-panel { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .glass-header { background: rgba(11, 15, 25, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .glow-text { text-shadow: 0 0 15px rgba(99, 102, 241, 0.4); }
+        
+        /* Micro-interactions */
+        .interactive-btn { transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, background-color 0.2s ease; }
+        .interactive-btn:active { transform: scale(0.97); }
+        .hover-lift { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2); border-color: rgba(99, 102, 241, 0.3); }
+        
+        /* Monaco Editor */
+        .monaco-highlight-line { background-color: rgba(225, 29, 72, 0.15); border-left: 3px solid #e11d48; margin-left: 2px; }
+        .editor-container { border: 1px solid rgba(255,255,255,0.08); border-radius: 0.5rem; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+        
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px rgba(99,102,241,0.2); } 50% { box-shadow: 0 0 25px rgba(99,102,241,0.5); } }
+        .animate-pulse-glow { animation: pulse-glow 2s infinite; }
+        
+        /* Toast Notifications */
+        #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
+        .toast { background: #1e293b; border: 1px solid #334155; color: #f8fafc; padding: 12px 16px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); display: flex; items: center; gap: 12px; font-size: 0.875rem; transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; opacity: 0; }
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast-success { border-left: 4px solid #10b981; }
+        .toast-error { border-left: 4px solid #ef4444; }
+        .toast-info { border-left: 4px solid #3b82f6; }
+        
+        /* Radial Progress for Score */
+        .radial-progress { transform: rotate(-90deg); }
+        .radial-progress circle { transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
 <body class="bg-navy-900 text-slate-300 font-sans min-h-screen relative flex flex-col">
@@ -196,65 +229,71 @@
             <section id="view-dashboard" class="view-section active flex-1">
                 <div class="p-6 lg:p-10 max-w-7xl mx-auto w-full pb-24">
                     
-                    <!-- Hero Section -->
-                    <div class="mb-12 text-center py-10 lg:py-16 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-navy-800 via-navy-900 to-navy-900 rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden">
-                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 mix-blend-overlay"></div>
-                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 relative z-10">Find Bugs Before They Become <span class="text-brand-400 glow-text">Problems</span></h1>
-                        <p class="text-lg text-slate-400 mb-8 max-w-2xl mx-auto relative z-10">AI-powered debugging, security analysis, and complexity optimization.</p>
-                        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
-                            <button onclick="app.navigate('audit')" class="px-8 py-3.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-semibold shadow-lg transition flex gap-2 transform hover:scale-105 justify-center">
-                                <i data-lucide="play" class="w-5 h-5"></i> Start Code Audit
+                    <!-- Hero / Welcome Section -->
+                    <div class="mb-10 p-8 lg:p-12 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-navy-900 to-[#0b0f19] rounded-3xl border border-slate-700/50 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] mix-blend-overlay"></div>
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-500 via-indigo-500 to-emerald-500 opacity-80"></div>
+                        
+                        <div class="relative z-10 text-center md:text-left">
+                            <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">Good morning, <span id="hero-name" class="text-brand-400 glow-text">Developer</span> 👋</h1>
+                            <p class="text-lg text-slate-400 max-w-xl">Improve your code, understand your bugs, and build better software. Your AI coding mentor is ready.</p>
+                        </div>
+                        
+                        <div class="relative z-10 flex flex-col gap-3 min-w-[200px]">
+                            <button onclick="app.resetAndNavigate('audit')" class="interactive-btn px-6 py-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-semibold shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                                <i data-lucide="zap" class="w-5 h-5"></i> Quick Start Audit
                             </button>
+                            <div class="text-center text-xs text-slate-500 font-medium">Supports Java, C++, Python</div>
                         </div>
                     </div>
 
-                    <!-- Quick Actions -->
-                    <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-                        <button onclick="app.resetAndNavigate('audit')" class="glass-panel p-5 rounded-xl text-left hover:bg-slate-800/50 transition group flex flex-col border-slate-800 hover:border-brand-500/50 shadow-sm">
-                            <div class="bg-brand-500/10 p-2.5 rounded-lg text-brand-400 mb-3 w-fit"><i data-lucide="terminal-square" class="w-6 h-6"></i></div>
-                            <h3 class="font-semibold text-white group-hover:text-brand-400 transition">New Code Audit</h3>
-                            <p class="text-xs text-slate-400 mt-1 mb-3">Analyze source code instantly.</p>
-                            <span class="text-xs font-medium text-brand-400 mt-auto flex items-center gap-1">Start <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
-                        </button>
-                        <button onclick="app.navigate('security')" class="glass-panel p-5 rounded-xl text-left hover:bg-slate-800/50 transition group flex flex-col border-slate-800 hover:border-rose-500/50 shadow-sm">
-                            <div class="bg-rose-500/10 p-2.5 rounded-lg text-rose-400 mb-3 w-fit"><i data-lucide="shield-alert" class="w-6 h-6"></i></div>
-                            <h3 class="font-semibold text-white group-hover:text-rose-400 transition">Security Scan</h3>
-                            <p class="text-xs text-slate-400 mt-1 mb-3">Find vulnerabilities & exploits.</p>
-                            <span class="text-xs font-medium text-rose-400 mt-auto flex items-center gap-1">Scan <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
-                        </button>
-                        <button onclick="app.navigate('history')" class="glass-panel p-5 rounded-xl text-left hover:bg-slate-800/50 transition group flex flex-col border-slate-800 hover:border-emerald-500/50 shadow-sm">
-                            <div class="bg-emerald-500/10 p-2.5 rounded-lg text-emerald-400 mb-3 w-fit"><i data-lucide="history" class="w-6 h-6"></i></div>
-                            <h3 class="font-semibold text-white group-hover:text-emerald-400 transition">View History</h3>
-                            <p class="text-xs text-slate-400 mt-1 mb-3">Access past audit reports.</p>
-                            <span class="text-xs font-medium text-emerald-400 mt-auto flex items-center gap-1">Open <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
-                        </button>
-                        <button onclick="app.navigate('reports')" class="glass-panel p-5 rounded-xl text-left hover:bg-slate-800/50 transition group flex flex-col border-slate-800 hover:border-amber-500/50 shadow-sm">
-                            <div class="bg-amber-500/10 p-2.5 rounded-lg text-amber-400 mb-3 w-fit"><i data-lucide="file-bar-chart-2" class="w-6 h-6"></i></div>
-                            <h3 class="font-semibold text-white group-hover:text-amber-400 transition">Generate Report</h3>
-                            <p class="text-xs text-slate-400 mt-1 mb-3">Export codebase summaries.</p>
-                            <span class="text-xs font-medium text-amber-400 mt-auto flex items-center gap-1">View <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
-                        </button>
+                    <!-- Statistics Cards -->
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-white">Learning & Analytics</h2>
+                        <button onclick="app.navigate('reports')" class="text-sm font-medium text-brand-400 hover:text-brand-300 transition">View Full Report</button>
                     </div>
-
-                    <!-- Statistics -->
-                    <h2 class="text-lg font-semibold text-white mb-4">Your Lifetime Stats</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-xl border-l-4 border-l-brand-500 hover:bg-slate-800/40 cursor-pointer transition group shadow-sm">
-                            <p class="text-sm font-medium text-slate-400 mb-1 group-hover:text-slate-300 transition">Total Audits</p>
-                            <p class="text-3xl font-bold text-white" id="stat-total">0</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                        <!-- Total Audits -->
+                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-2xl border border-slate-700/50 hover-lift cursor-pointer group relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-brand-500/10 rounded-full blur-2xl group-hover:bg-brand-500/20 transition"></div>
+                            <div class="flex justify-between items-start mb-4 relative z-10">
+                                <div class="p-2.5 bg-slate-800 rounded-lg text-brand-400 border border-slate-700"><i data-lucide="layers" class="w-5 h-5"></i></div>
+                                <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">+12%</span>
+                            </div>
+                            <p class="text-sm font-medium text-slate-400 mb-1">Total Audits</p>
+                            <p class="text-4xl font-bold text-white tracking-tight" id="stat-total">0</p>
                         </div>
-                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-500 hover:bg-slate-800/40 cursor-pointer transition group shadow-sm">
-                            <p class="text-sm font-medium text-slate-400 mb-1 group-hover:text-slate-300 transition">Avg Quality Score</p>
-                            <p class="text-3xl font-bold text-white" id="stat-avg">0</p>
+                        
+                        <!-- Avg Score -->
+                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-2xl border border-slate-700/50 hover-lift cursor-pointer group relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition"></div>
+                            <div class="flex justify-between items-start mb-4 relative z-10">
+                                <div class="p-2.5 bg-slate-800 rounded-lg text-emerald-400 border border-slate-700"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                                <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">Top 15%</span>
+                            </div>
+                            <p class="text-sm font-medium text-slate-400 mb-1">Avg Quality Score</p>
+                            <p class="text-4xl font-bold text-white tracking-tight" id="stat-avg">0</p>
                         </div>
-                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-xl border-l-4 border-l-rose-500 hover:bg-slate-800/40 cursor-pointer transition group shadow-sm">
-                            <p class="text-sm font-medium text-slate-400 mb-1 group-hover:text-slate-300 transition">Bugs Found</p>
-                            <p class="text-3xl font-bold text-white" id="stat-bugs">0</p>
+                        
+                        <!-- Bugs Found -->
+                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-2xl border border-slate-700/50 hover-lift cursor-pointer group relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition"></div>
+                            <div class="flex justify-between items-start mb-4 relative z-10">
+                                <div class="p-2.5 bg-slate-800 rounded-lg text-amber-400 border border-slate-700"><i data-lucide="bug" class="w-5 h-5"></i></div>
+                            </div>
+                            <p class="text-sm font-medium text-slate-400 mb-1">Bugs Detected</p>
+                            <p class="text-4xl font-bold text-white tracking-tight" id="stat-bugs">0</p>
                         </div>
-                        <div onclick="app.navigate('history')" class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-500 hover:bg-slate-800/40 cursor-pointer transition group shadow-sm">
-                            <p class="text-sm font-medium text-slate-400 mb-1 group-hover:text-slate-300 transition">Sec Vulnerabilities</p>
-                            <p class="text-3xl font-bold text-white" id="stat-sec">0</p>
+                        
+                        <!-- Security -->
+                        <div onclick="app.navigate('security')" class="glass-panel p-6 rounded-2xl border border-slate-700/50 hover-lift cursor-pointer group relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition"></div>
+                            <div class="flex justify-between items-start mb-4 relative z-10">
+                                <div class="p-2.5 bg-slate-800 rounded-lg text-rose-400 border border-slate-700"><i data-lucide="shield-alert" class="w-5 h-5"></i></div>
+                            </div>
+                            <p class="text-sm font-medium text-slate-400 mb-1">Security Issues</p>
+                            <p class="text-4xl font-bold text-white tracking-tight" id="stat-sec">0</p>
                         </div>
                     </div>
 
@@ -325,11 +364,12 @@
                                     </div>
                                     <h3 class="text-lg font-medium text-white mb-6">DevSentry AI is analyzing your code...</h3>
                                     <div class="w-64 space-y-3 text-sm" id="loading-steps">
-                                        <div class="flex items-center gap-3 text-slate-400" id="step-1"><i data-lucide="circle-dashed" class="w-4 h-4 animate-spin"></i> Parsing source code</div>
-                                        <div class="flex items-center gap-3 text-slate-600" id="step-2"><i data-lucide="circle" class="w-4 h-4"></i> Checking syntax</div>
-                                        <div class="flex items-center gap-3 text-slate-600" id="step-3"><i data-lucide="circle" class="w-4 h-4"></i> Detecting bugs</div>
-                                        <div class="flex items-center gap-3 text-slate-600" id="step-4"><i data-lucide="circle" class="w-4 h-4"></i> Checking security</div>
-                                        <div class="flex items-center gap-3 text-slate-600" id="step-5"><i data-lucide="circle" class="w-4 h-4"></i> Generating recommendations</div>
+                                        <div class="flex items-center gap-3 text-slate-400" id="step-1"><i data-lucide="circle-dashed" class="w-4 h-4 animate-spin"></i> Initializing AI Audit...</div>
+                                        <div class="flex items-center gap-3 text-slate-600" id="step-2"><i data-lucide="circle" class="w-4 h-4"></i> Scanning Code...</div>
+                                        <div class="flex items-center gap-3 text-slate-600" id="step-3"><i data-lucide="circle" class="w-4 h-4"></i> Analyzing Patterns...</div>
+                                        <div class="flex items-center gap-3 text-slate-600" id="step-4"><i data-lucide="circle" class="w-4 h-4"></i> Checking Security...</div>
+                                        <div class="flex items-center gap-3 text-slate-600" id="step-5"><i data-lucide="circle" class="w-4 h-4"></i> Generating Insights...</div>
+                                        <div class="flex items-center gap-3 text-slate-600" id="step-6"><i data-lucide="circle" class="w-4 h-4"></i> Audit Complete</div>
                                     </div>
                                 </div>
 
@@ -349,26 +389,39 @@
                                 <!-- RESULTS STATE -->
                                 <div id="state-results" class="hidden flex-col h-full bg-navy-950 overflow-y-auto">
                                     <!-- Top Score Card -->
-                                    <div class="p-6 bg-gradient-to-b from-slate-900 to-navy-950 border-b border-slate-800/60 shrink-0">
-                                        <div class="flex justify-between items-center cursor-pointer hover:opacity-80" onclick="app.switchTab('tab-overview')">
-                                            <div><h2 class="text-xl font-bold text-white flex items-center gap-2">OVERALL CODE QUALITY <span id="demo-badge" class="hidden text-[10px] bg-brand-500/20 text-brand-400 px-2 py-0.5 rounded border border-brand-500/30">DEMO</span></h2></div>
-                                            <div class="flex items-baseline gap-1"><span id="res-score" class="text-5xl font-bold tracking-tighter">0</span><span class="text-slate-500 font-medium">/ 100</span></div>
+                                    <div class="p-6 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-navy-950 to-navy-950 border-b border-slate-800/60 shrink-0 relative overflow-hidden">
+                                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.02]"></div>
+                                        <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10 cursor-pointer hover:opacity-90 transition-opacity" onclick="app.switchTab('tab-overview')">
+                                            
+                                            <div>
+                                                <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-2">OVERALL CODE QUALITY <span id="demo-badge" class="hidden text-[10px] bg-brand-500/20 text-brand-400 px-2 py-0.5 rounded border border-brand-500/30">DEMO</span></h2>
+                                                <p id="res-summary" class="text-sm text-slate-400 max-w-md line-clamp-2">Analysis complete.</p>
+                                            </div>
+
+                                            <div class="flex items-center gap-4">
+                                                <div class="radial-progress text-brand-500" style="--value:0; --size:6rem; --thickness: 0.5rem;" id="res-score-ring">
+                                                    <div class="flex flex-col items-center justify-center h-full w-full rounded-full bg-navy-950 border border-slate-800/50 shadow-inner">
+                                                        <div class="flex items-baseline gap-0.5"><span id="res-score" class="text-3xl font-bold tracking-tighter text-white">0</span></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </div>
-                                        <div class="grid grid-cols-4 gap-2 mt-6">
-                                            <div onclick="app.switchTab('tab-issues')" class="bg-navy-800/80 p-3 rounded-lg border border-slate-800 text-center cursor-pointer hover:border-rose-500/50 transition">
-                                                <div class="text-2xl font-bold text-white" id="res-stat-bugs">0</div>
+                                        <div class="grid grid-cols-4 gap-3 mt-6 relative z-10">
+                                            <div onclick="app.switchTab('tab-issues')" class="glass-panel p-3 rounded-xl border border-slate-700/50 text-center cursor-pointer hover-lift">
+                                                <div class="text-2xl font-bold text-rose-400" id="res-stat-bugs">0</div>
                                                 <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Bugs</div>
                                             </div>
-                                            <div onclick="app.switchTab('tab-security')" class="bg-navy-800/80 p-3 rounded-lg border border-slate-800 text-center cursor-pointer hover:border-amber-500/50 transition">
-                                                <div class="text-2xl font-bold text-white" id="res-stat-sec">0</div>
+                                            <div onclick="app.switchTab('tab-security')" class="glass-panel p-3 rounded-xl border border-slate-700/50 text-center cursor-pointer hover-lift">
+                                                <div class="text-2xl font-bold text-rose-500" id="res-stat-sec">0</div>
                                                 <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Security</div>
                                             </div>
-                                            <div onclick="app.switchTab('tab-performance')" class="bg-navy-800/80 p-3 rounded-lg border border-slate-800 text-center cursor-pointer hover:border-blue-500/50 transition">
-                                                <div class="text-2xl font-bold text-white" id="res-stat-perf">0</div>
-                                                <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Perf</div>
+                                            <div onclick="app.switchTab('tab-performance')" class="glass-panel p-3 rounded-xl border border-slate-700/50 text-center cursor-pointer hover-lift">
+                                                <div class="text-2xl font-bold text-amber-400" id="res-stat-perf">0</div>
+                                                <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Perf Issues</div>
                                             </div>
-                                            <div onclick="app.switchTab('tab-overview')" class="bg-navy-800/80 p-3 rounded-lg border border-slate-800 text-center cursor-pointer hover:border-emerald-500/50 transition">
-                                                <div class="text-2xl font-bold text-white" id="res-stat-smells">0</div>
+                                            <div class="glass-panel p-3 rounded-xl border border-slate-700/50 text-center cursor-default">
+                                                <div class="text-2xl font-bold text-blue-400" id="res-stat-smells">0</div>
                                                 <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Smells</div>
                                             </div>
                                         </div>
@@ -770,19 +823,44 @@
             },
 
             // ALERTS
+            showToast(title, msg, type = "info") {
+                const container = document.getElementById('toast-container');
+                if(!container) return;
+                
+                const toast = document.createElement('div');
+                let colorClass = 'toast-info';
+                let iconName = 'info';
+                
+                if(type === 'success' || type === 'emerald') { colorClass = 'toast-success'; iconName = 'check-circle'; }
+                if(type === 'error' || type === 'rose') { colorClass = 'toast-error'; iconName = 'alert-circle'; }
+                if(type === 'warning' || type === 'amber') { colorClass = 'toast-error'; iconName = 'alert-triangle'; }
+                
+                toast.className = `toast ${colorClass}`;
+                toast.innerHTML = `
+                    <i data-lucide="${iconName}" class="w-5 h-5"></i>
+                    <div>
+                        <h4 class="font-semibold text-sm">${title}</h4>
+                        <p class="text-xs text-slate-300 opacity-90">${msg}</p>
+                    </div>
+                `;
+                
+                container.appendChild(toast);
+                lucide.createIcons({root: toast});
+                
+                // Animate in
+                setTimeout(() => toast.classList.add('show'), 10);
+                
+                // Animate out
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 4000);
+            },
             showAlert(title, msg, icon = "info", color = "brand") {
-                document.getElementById('alert-title').textContent = title;
-                document.getElementById('alert-message').textContent = msg;
-                const iconEl = document.getElementById('alert-icon');
-                if(iconEl) {
-                    iconEl.setAttribute('data-lucide', icon);
-                    iconEl.className = `w-12 h-12 text-${color}-400 mx-auto mb-4`;
-                    lucide.createIcons();
-                }
-                const m = document.getElementById('alert-modal');
-                if(m) { m.classList.remove('hidden'); setTimeout(() => m.classList.remove('opacity-0'), 10); }
+                this.showToast(title, msg, color);
             },
             closeAlert() {
+                // Legacy modal closer - keep for compatibility if modal exists
                 const m = document.getElementById('alert-modal');
                 if(m) { m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); }
             },
@@ -970,25 +1048,29 @@
             },
 
             animateLoadingSteps() {
-                const texts = ["Parsing source code", "Checking syntax", "Detecting bugs", "Checking security", "Analyzing complexity", "Generating recommendations"];
-                const steps = [1,2,3,4,5].map(i => document.getElementById(`step-${i}`));
+                const texts = ["Initializing AI Audit...", "Scanning Code...", "Analyzing Patterns...", "Checking Security...", "Generating Insights...", "Audit Complete"];
+                const steps = [1,2,3,4,5,6].map(i => document.getElementById(`step-${i}`));
                 steps.forEach((s, i) => { if(s) { s.className = "flex items-center gap-3 text-slate-600"; s.innerHTML = `<i data-lucide="circle" class="w-4 h-4"></i> ${texts[i]}`; }});
                 lucide.createIcons();
 
                 let current = 0;
                 const interval = setInterval(() => {
                     if(!this.isAuditing) { clearInterval(interval); return; }
+                    
+                    const btnText = document.getElementById('btn-run-text');
+                    
                     if (current > 0 && current <= steps.length && steps[current-1]) {
                         steps[current-1].className = "flex items-center gap-3 text-emerald-400";
                         steps[current-1].innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i> ${texts[current-1]}`;
                     }
                     if (current < steps.length && steps[current]) {
                         steps[current].className = "flex items-center gap-3 text-brand-400";
-                        steps[current].innerHTML = `<i data-lucide="circle-dashed" class="w-4 h-4 animate-spin"></i> ${texts[current]}`;
+                        steps[current].innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> <span class="font-medium">${texts[current]}</span>`;
+                        if(btnText) btnText.textContent = texts[current];
                         lucide.createIcons();
                         current++;
                     } else { clearInterval(interval); }
-                }, 350);
+                }, 300);
             },
 
             renderResults(data, originalCode, isDemo) {
@@ -1001,9 +1083,19 @@
 
                 const s = data.score || data.qualityScore || 0;
                 const resScore = document.getElementById('res-score');
+                const resScoreRing = document.getElementById('res-score-ring');
+                
                 if(resScore) {
-                    resScore.className = `text-5xl font-bold tracking-tighter ${s >= 80 ? 'text-emerald-400' : s >= 60 ? 'text-amber-400' : 'text-rose-400'}`;
                     resScore.textContent = s;
+                }
+                if(resScoreRing) {
+                    const colorClass = s >= 80 ? 'text-emerald-500' : s >= 60 ? 'text-amber-500' : 'text-rose-500';
+                    resScoreRing.className = `radial-progress ${colorClass} transition-all duration-1000 ease-out`;
+                    
+                    // Animate the ring from 0 to target score
+                    setTimeout(() => {
+                        resScoreRing.style.setProperty('--value', s);
+                    }, 100);
                 }
 
                 const issues = data.issues || [];
@@ -1101,38 +1193,47 @@
                         const fixSafeCode = issue.fixCode ? issue.fixCode.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : '';
 
                         container.innerHTML += `
-                            <div class="glass-panel border-l-4 border-l-${col}-500 rounded-r-xl p-5 shadow-sm mb-4">
+                            <div class="glass-panel border-l-4 border-l-${col}-500 rounded-r-xl p-5 shadow-sm mb-4 hover-lift">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-2">
                                         <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-${col}-500/20 text-${col}-400 border border-${col}-500/30">${issue.severity}</span>
+                                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Bug #${idx+1}</span>
                                     </div>
-                                    <button onclick="app.highlightLine(${issue.lineNumber})" class="text-xs font-mono text-brand-400 hover:text-brand-300 bg-brand-500/10 px-2 py-1 rounded transition flex items-center gap-1"><i data-lucide="target" class="w-3 h-3"></i> Line ${issue.lineNumber}</button>
+                                    ${issue.lineNumber ? `<button onclick="app.highlightLine(${issue.lineNumber})" class="text-xs font-mono text-brand-400 hover:text-brand-300 bg-brand-500/10 hover:bg-brand-500/20 px-2 py-1 rounded transition flex items-center gap-1 interactive-btn"><i data-lucide="target" class="w-3 h-3"></i> Line ${issue.lineNumber}</button>` : ''}
                                 </div>
-                                <h4 class="text-base font-semibold text-white mb-2">${issue.title || 'Issue Detected'}</h4>
-                                <p class="text-sm text-slate-300 mb-4">${issue.description}</p>
+                                <h4 class="text-base font-semibold text-white mb-4">${issue.title || 'Issue Detected'}</h4>
+                                
+                                <div class="space-y-4 mb-5">
+                                    <div class="bg-navy-950/50 p-3 rounded-lg border border-slate-800/50">
+                                        <h5 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">What Happened</h5>
+                                        <p class="text-sm text-slate-300">${issue.description}</p>
+                                    </div>
+                                    <div class="bg-brand-900/10 p-3 rounded-lg border border-brand-500/10">
+                                        <h5 class="text-[10px] font-bold text-brand-400 uppercase tracking-wider mb-1">How to fix it & Why</h5>
+                                        <p class="text-sm text-brand-100/80">${issue.recommendation || 'Consider refactoring this code block.'}</p>
+                                    </div>
+                                </div>
                                 
                                 <div class="flex gap-3">
-                                    <button onclick="app.highlightLine(${issue.lineNumber})" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-white rounded border border-slate-700 transition">Show in Code</button>
-                                    ${issue.fixCode ? `<button onclick="app.showFixUI('${issueId}')" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-xs font-medium text-white rounded shadow-lg transition">Fix This Bug</button>` : ''}
+                                    ${issue.lineNumber ? `<button onclick="app.highlightLine(${issue.lineNumber})" class="interactive-btn px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-white rounded-lg border border-slate-700 transition">Show in Code</button>` : ''}
+                                    ${issue.fixCode ? `<button onclick="app.showFixUI('${issueId}')" class="interactive-btn px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-xs font-medium text-white rounded-lg shadow-lg shadow-brand-500/20 transition flex items-center gap-1"><i data-lucide="wrench" class="w-3 h-3"></i> Explain More & Fix</button>` : ''}
                                 </div>
 
-                                <div id="fix-ui-${issueId}" class="hidden mt-4 bg-navy-950 border border-slate-800 rounded-lg overflow-hidden">
+                                <div id="fix-ui-${issueId}" class="hidden mt-4 bg-navy-950 border border-slate-800 rounded-xl overflow-hidden shadow-inner">
                                     <div class="grid grid-cols-1 md:grid-cols-2">
                                         <div class="border-b md:border-b-0 md:border-r border-slate-800">
-                                            <div class="bg-rose-500/10 px-3 py-1 border-b border-rose-500/20 text-[10px] font-bold text-rose-400 tracking-wider">BEFORE</div>
-                                            <pre class="p-3 text-xs code-font text-slate-400 overflow-x-auto"><code>${problemCode.replace(/</g, '&lt;')}</code></pre>
+                                            <div class="bg-rose-500/10 px-3 py-1.5 border-b border-rose-500/20 text-[10px] font-bold text-rose-400 tracking-wider flex items-center gap-1"><i data-lucide="x-circle" class="w-3 h-3"></i> VULNERABLE CODE</div>
+                                            <pre class="p-4 text-xs code-font text-slate-400 overflow-x-auto whitespace-pre-wrap"><code>${problemCode.replace(/</g, '&lt;')}</code></pre>
                                         </div>
                                         <div>
-                                            <div class="bg-emerald-500/10 px-3 py-1 border-b border-emerald-500/20 text-[10px] font-bold text-emerald-400 tracking-wider">AFTER</div>
-                                            <pre class="p-3 text-xs code-font text-emerald-300 overflow-x-auto"><code>${issue.fixCode ? issue.fixCode.replace(/</g, '&lt;') : ''}</code></pre>
+                                            <div class="bg-emerald-500/10 px-3 py-1.5 border-b border-emerald-500/20 text-[10px] font-bold text-emerald-400 tracking-wider flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i> SECURE FIX</div>
+                                            <pre class="p-4 text-xs code-font text-emerald-300 overflow-x-auto whitespace-pre-wrap"><code>${issue.fixCode ? issue.fixCode.replace(/</g, '&lt;') : ''}</code></pre>
                                         </div>
                                     </div>
-                                    <div class="bg-slate-900 p-3 border-t border-slate-800 flex justify-between items-center">
-                                        <span class="text-xs text-slate-400"><i data-lucide="info" class="w-3 h-3 inline"></i> ${issue.recommendation}</span>
-                                        <button onclick="app.applyFixCode('${fixSafeCode}', '${issueId}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded transition">Apply Fix</button>
-                                    </div>
+                                    ${issue.fixCode ? `<div class="p-3 bg-slate-900 border-t border-slate-800 text-right"><button onclick="app.applyFixCode('${fixSafeCode}', '${issueId}')" class="interactive-btn px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white rounded-lg shadow-lg shadow-emerald-500/20 transition flex items-center gap-2 ml-auto"><i data-lucide="check" class="w-4 h-4"></i> Apply Secure Fix</button></div>` : ''}
                                 </div>
-                            </div>`;
+                            </div>
+                        `;
                     });
                 }
             },
@@ -1352,5 +1453,6 @@
 
         document.addEventListener('DOMContentLoaded', () => app.init());
     </script>
+    <div id="toast-container"></div>
 </body>
 </html>
