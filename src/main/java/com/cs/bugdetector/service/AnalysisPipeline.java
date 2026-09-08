@@ -59,6 +59,7 @@ public class AnalysisPipeline {
     private BugReportResponse aggregateResults(AnalysisResult staticResult, BugReportResponse aiResponse) {
         if (staticResult != null) {
             aiResponse.setCompileStatus(staticResult.compileStatus());
+            aiResponse.setExecutionOutput(staticResult.executionOutput());
 
             // Merge static issues into the overall issues list
             List<Issue> mergedIssues = new ArrayList<>();

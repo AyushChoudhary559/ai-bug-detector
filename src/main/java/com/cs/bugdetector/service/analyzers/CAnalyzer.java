@@ -35,15 +35,18 @@ public class CAnalyzer implements LanguageAnalyzer {
 
     @Override
     public AnalysisResult analyze(String sourceCode) {
-        if (!isAvailable()) return new AnalysisResult(false, "UNAVAILABLE: gcc not found.", List.of());
+        if (!isAvailable()) return new AnalysisResult(false, "UNAVAILABLE: gcc not found.", List.of(), "");
 
-        CompilerService.CompilerResult result = compilerService.executeWithTimeout(
-                new String[]{"gcc", "-Wall", "-Wextra", "-Wpedantic", "-fsyntax-only", "source.c"}, 
+        CompilerService.CompilerResult result = compilerService.executeMultipleCommands(
+                new String[][]{{"gcc", "-Wall", "-Wextra", "-Wpedantic", "source.c", "-o", "out.exe"}, {"./out.exe"}}, 
                 sourceCode, "source.c"
         );
 
-        if (result.isTimeout()) return new AnalysisResult(false, "TIMEOUT", List.of());
-        return new AnalysisResult(result.success(), result.success() ? "PASSED" : "FAILED", parseOutput(result.output()));
+        if (result.isTimeout()) return new AnalysisResult(false, "TIMEOUT", List.of(), "Execution Timed Out (>10s)");
+        
+        List<Issue> issues = parseOutput(result.output());
+        String out = result.success() ? result.output() : "";
+        return new AnalysisResult(result.success(), result.success() ? "PASSED" : "FAILED", issues, out);
     }
 
     protected List<Issue> parseOutput(String output) {

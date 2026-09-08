@@ -32,14 +32,17 @@ public class CppAnalyzer extends CAnalyzer {
 
     @Override
     public AnalysisResult analyze(String sourceCode) {
-        if (!isAvailable()) return new AnalysisResult(false, "UNAVAILABLE: g++ not found.", List.of());
+        if (!isAvailable()) return new AnalysisResult(false, "UNAVAILABLE: g++ not found.", List.of(), "");
 
-        CompilerService.CompilerResult result = compilerService.executeWithTimeout(
-                new String[]{"g++", "-Wall", "-Wextra", "-Wpedantic", "-fsyntax-only", "source.cpp"}, 
+        CompilerService.CompilerResult result = compilerService.executeMultipleCommands(
+                new String[][]{{"g++", "-Wall", "-Wextra", "-Wpedantic", "source.cpp", "-o", "out.exe"}, {"./out.exe"}}, 
                 sourceCode, "source.cpp"
         );
 
-        if (result.isTimeout()) return new AnalysisResult(false, "TIMEOUT", List.of());
-        return new AnalysisResult(result.success(), result.success() ? "PASSED" : "FAILED", parseOutput(result.output()));
+        if (result.isTimeout()) return new AnalysisResult(false, "TIMEOUT", List.of(), "Execution Timed Out (>10s)");
+        
+        List<Issue> issues = parseOutput(result.output());
+        String out = result.success() ? result.output() : "";
+        return new AnalysisResult(result.success(), result.success() ? "PASSED" : "FAILED", issues, out);
     }
 }

@@ -8,5 +8,5 @@ public interface LanguageAnalyzer {
     String getLanguage();
     AnalysisResult analyze(String sourceCode);
 
-    record AnalysisResult(boolean compileSuccess, String compileStatus, List<Issue> issues) {}
+    record AnalysisResult(boolean compileSuccess, String compileStatus, List<Issue> issues, String executionOutput) {}
 }

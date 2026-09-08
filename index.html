@@ -581,21 +581,59 @@
                 if(typeof require === 'undefined') return;
                 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
                 require(['vs/editor/editor.main'], () => {
-                    document.getElementById('editor-loading').style.display = 'none';
-                    this.editor = monaco.editor.create(document.getElementById('editor-container'), {
-                        value: "", language: 'java', theme: 'vs', automaticLayout: true,
-                        fontFamily: '"Fira Code", monospace', fontSize: 14, minimap: { enabled: false }, padding: { top: 16 }, scrollBeyondLastLine: false
+                    monaco.editor.defineTheme('devsentry-theme', {
+                        base: 'vs',
+                        inherit: true,
+                        rules: [
+                            { background: 'F7F5F0' }
+                        ],
+                        colors: {
+                            'editor.background': '#F7F5F0',
+                            'editor.lineHighlightBackground': '#FDFBF7',
+                            'editorLineNumber.foreground': '#8A877F',
+                            'editor.selectionBackground': '#EAE3D7'
+                        }
                     });
+                    
+                    const el = document.getElementById('editor-loading');
+                    if(el) el.style.display = 'none';
+                    
+                    this.editor = monaco.editor.create(document.getElementById('editor-container'), {
+                        value: "", language: 'java', theme: 'devsentry-theme', automaticLayout: true,
+                        fontFamily: '"Fira Code", monospace', fontSize: 15, minimap: { enabled: false }, padding: { top: 24, bottom: 24 }, scrollBeyondLastLine: false,
+                        renderLineHighlight: 'all', roundedSelection: true
+                    });
+                    
+                    this.loadTemplate('java');
                 });
             },
-            changeLanguage(val) {
+            changeLanguage(val, loadTemplate = false) {
                 const select = document.getElementById('language-select');
                 if(select) select.value = val;
-                if (this.editor) monaco.editor.setModelLanguage(this.editor.getModel(), val);
+                
+                let monacoLang = val;
+                if(val === 'c' || val === 'cpp') monacoLang = 'cpp';
+                
+                if (this.editor) monaco.editor.setModelLanguage(this.editor.getModel(), monacoLang);
+                if (loadTemplate) this.loadTemplate(val);
             },
             clearEditor() {
                 if (this.editor) this.editor.setValue("");
-                this.showEmpty();
+                document.getElementById('output-status').innerHTML = `STATUS: <span class="text-charcoal-600">READY</span>`;
+                document.getElementById('output-console').textContent = "Awaiting execution...";
+                
+                document.getElementById('audit-results').classList.add('hidden');
+                document.getElementById('audit-results').classList.remove('flex');
+                document.getElementById('audit-error').classList.add('hidden');
+                document.getElementById('audit-loading').classList.add('hidden');
+                
+                if (this.editor) this.editor.focus();
+            },
+                        copyOutputData() {
+                const out = document.getElementById('output-console').textContent;
+                navigator.clipboard.writeText(out).then(() => {
+                    this.showAlert("Copied", "Output copied to clipboard.", "copy", "emerald");
+                });
             },
             copyCode() {
                 if (!this.editor) return;
@@ -605,13 +643,14 @@
                 });
             },
             loadTemplate(lang) {
-                this.navigate('audit');
-                this.changeLanguage(lang);
                 if (this.editor) {
-                    if (lang === 'java') this.editor.setValue(`public class UserAuth {\n    public boolean login(String user, String pass) {\n        // Vulnerable to SQL Injection\n        String query = "SELECT * FROM users WHERE uname='" + user + "' AND pword='" + pass + "'";\n        \n        // Resource Leak\n        Connection conn = dataSource.getConnection();\n        Statement stmt = conn.createStatement();\n        ResultSet rs = stmt.executeQuery(query);\n        \n        return rs.next();\n    }\n}`);
-                    else if (lang === 'cpp') this.editor.setValue(`#include <iostream>\nusing namespace std;\n\nint main() {\n    int arr[3] = {1, 2, 3};\n    for(int i = 0; i <= 3; i++) {\n        cout << arr[i] << endl;\n    }\n    return 0;\n}`);
-                    else if (lang === 'python') this.editor.setValue(`numbers = [1, 2, 3]\nfor i in range(4):\n    print(numbers[i])`);
-                    this.showEmpty();
+                    if (lang === 'java') this.editor.setValue(`public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello DevSentry AI");\n    }\n}`);
+                    else if (lang === 'cpp') this.editor.setValue(`#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello DevSentry AI";\n    return 0;\n}`);
+                    else if (lang === 'c') this.editor.setValue(`#include <stdio.h>\n\nint main() {\n    printf("Hello DevSentry AI\n");\n    return 0;\n}`);
+                    else if (lang === 'python') this.editor.setValue(`print("Hello DevSentry AI")`);
+                    else if (lang === 'javascript') this.editor.setValue(`console.log("Hello DevSentry AI");`);
+                    else if (lang === 'html') this.editor.setValue(`<!DOCTYPE html>\n<html>\n<head>\n<title>Test</title>\n</head>\n<body>\n<h1>Hello DevSentry AI</h1>\n</body>\n</html>`);
+                    else if (lang === 'sql') this.editor.setValue(`SELECT * FROM users;`);
                 }
             },
             highlightLine(lineNum) {

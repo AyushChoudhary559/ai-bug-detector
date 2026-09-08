@@ -35,15 +35,18 @@ public class PythonAnalyzer implements LanguageAnalyzer {
 
     @Override
     public AnalysisResult analyze(String sourceCode) {
-        if (!isAvailable()) return new AnalysisResult(false, "UNAVAILABLE: python not found.", List.of());
+        if (!isAvailable()) return new AnalysisResult(false, "UNAVAILABLE: python not found.", List.of(), "");
 
         CompilerService.CompilerResult result = compilerService.executeWithTimeout(
-                new String[]{"python", "-m", "py_compile", "source.py"}, 
+                new String[]{"python", "source.py"}, 
                 sourceCode, "source.py"
         );
 
-        if (result.isTimeout()) return new AnalysisResult(false, "TIMEOUT", List.of());
-        return new AnalysisResult(result.success(), result.success() ? "PASSED" : "FAILED", parseOutput(result.output()));
+        if (result.isTimeout()) return new AnalysisResult(false, "TIMEOUT", List.of(), "Execution Timed Out (>10s)");
+        
+        List<Issue> issues = parseOutput(result.output());
+        String out = issues.isEmpty() ? result.output() : "";
+        return new AnalysisResult(issues.isEmpty(), issues.isEmpty() ? "PASSED" : "FAILED", issues, out);
     }
 
     private List<Issue> parseOutput(String output) {

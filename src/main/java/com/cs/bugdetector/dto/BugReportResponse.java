@@ -24,6 +24,7 @@ public class BugReportResponse {
     private String summary;
     private String status;
     private String compileStatus;
+    private String executionOutput;
     private int totalBugsFound;
 
     @Builder.Default

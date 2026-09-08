@@ -35,14 +35,14 @@ public class JsAnalyzer implements LanguageAnalyzer {
 
     @Override
     public AnalysisResult analyze(String sourceCode) {
-        if (!isAvailable()) return new AnalysisResult(false, "UNAVAILABLE: node.js not found.", List.of());
+        if (!isAvailable()) return new AnalysisResult(false, "UNAVAILABLE: node.js not found.", List.of(), "");
 
         CompilerService.CompilerResult result = compilerService.executeWithTimeout(
-                new String[]{"node", "--check", "source.js"}, 
+                new String[]{"node", "source.js"}, 
                 sourceCode, "source.js"
         );
 
-        if (result.isTimeout()) return new AnalysisResult(false, "TIMEOUT", List.of());
+        if (result.isTimeout()) return new AnalysisResult(false, "TIMEOUT", List.of(), "Execution Timed Out (>10s)");
 
         List<Issue> issues = new ArrayList<>();
         if (!result.success()) {
@@ -50,11 +50,11 @@ public class JsAnalyzer implements LanguageAnalyzer {
                 .source("COMPILER")
                 .issueType("SYNTAX")
                 .severity("CRITICAL")
-                .title("JavaScript Syntax Error")
+                .title("JavaScript Error")
                 .description(result.output().length() > 500 ? result.output().substring(0, 500) + "..." : result.output())
                 .build());
         }
 
-        return new AnalysisResult(result.success(), result.success() ? "PASSED" : "FAILED", issues);
+        return new AnalysisResult(result.success(), result.success() ? "PASSED" : "FAILED", issues, result.success() ? result.output() : "");
     }
 }

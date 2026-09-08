@@ -40,6 +40,6 @@ public class SqlAnalyzer implements LanguageAnalyzer {
         }
 
         boolean success = issues.isEmpty();
-        return new AnalysisResult(success, success ? "PASSED" : "FAILED", issues);
+        return new AnalysisResult(success, success ? "PASSED" : "FAILED", issues, "Valid SQL Syntax");
     }
 }

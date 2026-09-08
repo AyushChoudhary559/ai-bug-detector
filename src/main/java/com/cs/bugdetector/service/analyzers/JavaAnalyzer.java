@@ -39,19 +39,20 @@ public class JavaAnalyzer implements LanguageAnalyzer {
     @Override
     public AnalysisResult analyze(String sourceCode) {
         if (!isAvailable()) {
-            return new AnalysisResult(false, "UNAVAILABLE: Java compiler not found.", List.of());
+            return new AnalysisResult(false, "UNAVAILABLE: Java compiler not found.", List.of(), "");
         }
 
-        CompilerService.CompilerResult result = compilerService.executeWithTimeout(
-                new String[]{"javac", "Main.java"}, sourceCode, "Main.java"
+        CompilerService.CompilerResult result = compilerService.executeMultipleCommands(
+                new String[][]{{"javac", "Main.java"}, {"java", "Main"}}, sourceCode, "Main.java"
         );
 
         if (result.isTimeout()) {
-            return new AnalysisResult(false, "TIMEOUT", List.of());
+            return new AnalysisResult(false, "TIMEOUT", List.of(), "Execution Timed Out (>10s)");
         }
 
         List<Issue> issues = parseOutput(result.output());
-        return new AnalysisResult(result.success(), result.success() ? "PASSED" : "FAILED", issues);
+        String out = result.success() ? result.output() : (issues.isEmpty() ? result.output() : "");
+        return new AnalysisResult(result.success(), result.success() ? "PASSED" : "FAILED", issues, out);
     }
 
     private List<Issue> parseOutput(String output) {

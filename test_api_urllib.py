@@ -2,9 +2,9 @@ import urllib.request
 import json
 
 data = {
-    "language": "python",
-    "sourceCode": "def test_function()\n    print('Missing colon!')",
-    "fileName": "test.py"
+    "language": "java",
+    "sourceCode": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello DevSentry AI\");\n    }\n}",
+    "fileName": "Main.java"
 }
 
 req = urllib.request.Request("http://localhost:8080/api/v1/detector/analyze", 
