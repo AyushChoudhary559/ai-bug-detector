@@ -758,7 +758,7 @@
                 }
             },
 
-            toggleTheme() { this.showAlert("Theme", "DevSentry AI is currently locked in Dark Mode for optimal focus."); },
+            ,
 
             // AUTHENTICATION
             loadAuth() {
@@ -1033,14 +1033,48 @@
                     else el.classList.add('hidden');
                 }
             },
-            applyFixCode(codeToApply, issueId) {
-                this.showAlert("Review Fix", "For safety, please copy the suggested fix and paste it into the exact line.", "alert-circle", "brand");
-                if(issueId) this.showFixUI(issueId);
+            applyFixCode(fixCode, lineNumber, issueId) {
+                if (!this.editor) return;
+                const model = this.editor.getModel();
+                if (!model) return;
+                
+                if (lineNumber && lineNumber > 0 && lineNumber <= model.getLineCount()) {
+                    // Replace the specific line
+                    const lineContent = model.getLineContent(lineNumber);
+                    const range = new monaco.Range(lineNumber, 1, lineNumber, lineContent.length + 1);
+                    this.editor.executeEdits("DevSentry Fix", [{ range: range, text: fixCode, forceMoveMarkers: true }]);
+                } else {
+                    // Replace whole file if no line number or if it's a global fix
+                    this.editor.setValue(fixCode);
+                }
+                
+                this.showAlert("Fix Applied", "The suggested code has been applied.", "check-circle", "success");
             },
 
             startSecurityScan() {
                 this.navigate('audit');
-                this.loadTemplate('java');
+                this.changeLanguage('java', false);
+                if (this.editor) {
+                    this.editor.setValue(`public class UserAuth {\n    public boolean login(String user, String pass) {\n        // Vulnerable to SQL Injection\n        String query = "SELECT * FROM users WHERE uname='" + user + "' AND pword='" + pass + "'";\n        \n        // Resource Leak\n        Connection conn = dataSource.getConnection();\n        Statement stmt = conn.createStatement();\n        ResultSet rs = stmt.executeQuery(query);\n        \n        return rs.next();\n    }\n}`);
+                }
+                setTimeout(() => this.runAudit(true), 500);
+            },
+            
+            startPerformanceScan() {
+                this.navigate('audit');
+                this.changeLanguage('python', false);
+                if (this.editor) {
+                    this.editor.setValue(`def bad_performance(data):\n    result = []\n    for item in data:\n        # O(N^2) complexity hidden in 'in' operator on a list\n        if item not in result:\n            result.append(item)\n    return result`);
+                }
+                setTimeout(() => this.runAudit(true), 500);
+            },
+            
+            startCleanCodeScan() {
+                this.navigate('audit');
+                this.changeLanguage('cpp', false);
+                if (this.editor) {
+                    this.editor.setValue(`#include <iostream>\n\n// Anti-pattern: global state, magic numbers, missing memory management\nint MAGIC = 42;\n\nvoid process() {\n    int* leak = new int[100];\n    if (MAGIC == 42) {\n        return; // Memory leak here!\n    }\n    delete[] leak;\n}\n\nint main() {\n    process();\n    return 0;\n}`);
+                }
                 setTimeout(() => this.runAudit(true), 500);
             },
 
@@ -1054,7 +1088,7 @@
                 if(empty) empty.classList.remove('hidden');
             },
 
-            async runAudit(forceMock = false) {
+            async runAudit() {
                 if (this.isAuditing) return;
                 if (!this.editor) return;
 
@@ -1081,10 +1115,7 @@
 
                 try {
                     let data;
-                    if (forceMock) {
-                        await new Promise(r => setTimeout(r, 2000)); // Simulate network latency
-                        data = this.generateMockData(lang, code);
-                    } else {
+                    
                         try {
                             const headers = { 'Content-Type': 'application/json' };
                             if (this.user && this.user.token) {
@@ -1119,10 +1150,8 @@
                             if(btnRun) btnRun.disabled = false;
                             if(btnRunText) btnRunText.textContent = "Run AI Audit";
                             return; // Stop execution
-                        } 
-                    }
-                    this.currentAuditData = data;
-                    this.renderResults(data, code, forceMock);
+                        }this.currentAuditData = data;
+                    this.renderResults(data, code, false);
                     this.saveAuditToHistory(data, lang, code);
                 } catch (err) {
                     document.getElementById('audit-loading').classList.add('hidden');
@@ -1308,7 +1337,8 @@
                             <p class="text-charcoal-600 text-sm leading-relaxed">${issue.recommendation}</p>
                         </div>
                         ${issue.fixCode ? `
-                        <div class="bg-charcoal-900 text-ivory-50 p-4 rounded-sm font-mono text-sm overflow-x-auto shadow-panel">
+                        <div class="bg-charcoal-900 text-ivory-50 p-4 rounded-sm font-mono text-sm overflow-x-auto shadow-panel relative group">
+                            <button onclick="app.applyFixCode(\`${issue.fixCode ? issue.fixCode.replace(/\`/g, '\\`').replace(/\$/g, '\\$') : ''}\`, ${issue.lineNumber || 'null'})" class="absolute top-2 right-2 bg-brand-500 hover:bg-brand-600 text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition">Apply Fix</button>
                             <pre><code>${fixCodeSafe}</code></pre>
                         </div>` : ''}
                         <div class="pt-4 flex gap-4">
@@ -1551,51 +1581,7 @@
             },
 
             // DEMO SERVICE
-            generateMockData(lang, code) {
-                const isJava = lang === 'java';
-                const isCpp = lang === 'cpp';
-                
-                if (isJava) {
-                    return {
-                        score: 45, summary: "The Java codebase is functional but contains critical security vulnerabilities (SQL Injection) and logical resource leaks.",
-                        issues: [
-                            { lineNumber: 4, issueType: "SECURITY", severity: "CRITICAL", title: "SQL Injection Vector", description: "User input is directly concatenated into the SQL query string.", recommendation: "Use PreparedStatement with parameterized queries.", fixCode: `String query = "SELECT * FROM users WHERE uname=? AND pword=?";\nPreparedStatement pstmt = conn.prepareStatement(query);\npstmt.setString(1, user);\npstmt.setString(2, pass);` },
-                            { lineNumber: 8, issueType: "LOGIC", severity: "MEDIUM", title: "Possible NullPointerException / Unclosed Connection", description: "Database resources are opened but never closed.", recommendation: "Wrap the database logic in a try-with-resources block.", fixCode: `try (Connection conn = dataSource.getConnection();\n     PreparedStatement pstmt = conn.prepareStatement(query)) {\n    // Execute query\n}` }
-                        ],
-                        complexity: { time: "O(n)", timeExplanation: "Linear execution path based on result set iteration.", space: "O(1)", spaceExplanation: "No dynamically scaling auxiliary data structures." },
-                        performance: ["String concatenation in a loop should use StringBuilder."],
-                        quality: { readability: 80, maintainability: 40, reliability: 45, smells: 4 },
-                        testCases: [
-                            { input: "'admin', 'pass'", expected: "true", purpose: "Standard Auth" },
-                            { input: "'admin\\' OR \\'1\\'=\\'1', ''", expected: "Exception", purpose: "SQL Injection defense" }
-                        ]
-                    };
-                } else if (isCpp) {
-                    return {
-                        score: 65, summary: "The C++ code contains a critical memory management flaw. It allocates arrays on the heap without freeing them, causing a memory leak.",
-                        issues: [
-                            { lineNumber: 4, issueType: "LOGIC", severity: "HIGH", title: "Memory Leak", description: "Heap memory allocated via 'new' is not deallocated.", recommendation: "Use std::unique_ptr for automatic memory management or call delete[].", fixCode: `std::unique_ptr<int[]> data(new int[100]);` },
-                            { lineNumber: 8, issueType: "LOGIC", severity: "HIGH", title: "Array Out of Bounds", description: "The loop condition i <= 3 iterates 4 times, but array size is 3.", recommendation: "Change the condition to i < 3.", fixCode: `for(int i = 0; i < 3; i++) {\n    cout << arr[i] << endl;\n}` }
-                        ],
-                        complexity: { time: "O(n)", timeExplanation: "Loop iterates over the array linearly.", space: "O(n)", spaceExplanation: "Memory is allocated based on a fixed size (or variable input)." },
-                        performance: ["Avoid raw pointers where possible.", "Consider using std::vector instead of raw arrays."],
-                        quality: { readability: 85, maintainability: 60, smells: 2 },
-                        testCases: [ { input: "None", expected: "1\\n2\\n3", purpose: "Normal execution" } ]
-                    };
-                } else {
-                    return {
-                        score: 78, summary: "The Python script is reasonably well written but contains an indexing risk and unoptimized loops.",
-                        issues: [
-                            { lineNumber: 4, issueType: "LOGIC", severity: "HIGH", title: "IndexError Risk", description: "The range(4) will cause an IndexError because the list only has 3 elements.", recommendation: "Iterate directly over the list or use range(len(numbers)).", fixCode: `for num in numbers:\n    print(num)` }
-                        ],
-                        complexity: { time: "O(n)", timeExplanation: "Loops linearly through the sequence.", space: "O(1)", spaceExplanation: "No extra lists created." },
-                        performance: ["Direct iteration is faster than index lookups."],
-                        quality: { readability: 90, maintainability: 85, smells: 1 },
-                        testCases: [ { input: "[1,2,3]", expected: "1\\n2\\n3", purpose: "Standard print" } ]
-                    };
-                }
-            }
-        };
+            
 
         // Event Listeners
         document.addEventListener('click', (e) => {
@@ -1608,3 +1594,7 @@
     </script>
 </body>
 </html>
+
+
+
+

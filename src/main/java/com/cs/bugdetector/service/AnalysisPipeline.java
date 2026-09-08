@@ -20,7 +20,7 @@ public class AnalysisPipeline {
 
     private final List<LanguageAnalyzer> analyzers;
     private final AiCodeAnalysisService aiService;
-    private final MockStaticAnalysisService mockService;
+    
 
     public BugReportResponse runPipeline(CodeAnalysisRequest request) {
         String lang = request.getLanguage() != null ? request.getLanguage().toLowerCase() : "java";
@@ -48,8 +48,11 @@ public class AnalysisPipeline {
                 throw new IllegalStateException("AI response returned empty result");
             }
         } catch (Exception e) {
-            log.info("AI service unavailable. Using mock static engine. Details: {}", e.getMessage());
-            aiResponse = mockService.analyzeMock(request);
+            log.info("AI service unavailable or failed. Details: {}", e.getMessage());
+            aiResponse = new BugReportResponse();
+            aiResponse.setLanguage(lang);
+            aiResponse.setSummary("AI analysis unavailable. Displaying toolchain results only.");
+            aiResponse.setScore(0);
         }
 
         // 3. Aggregate Results

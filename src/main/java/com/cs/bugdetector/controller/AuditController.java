@@ -7,7 +7,6 @@ import com.cs.bugdetector.entity.User;
 import com.cs.bugdetector.repository.AuditRecordRepository;
 import com.cs.bugdetector.repository.UserRepository;
 import com.cs.bugdetector.service.AiCodeAnalysisService;
-import com.cs.bugdetector.service.MockStaticAnalysisService;
 import com.cs.bugdetector.service.AnalysisPipeline;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
